@@ -11,7 +11,8 @@ require([
     "views/issues",
     "views/issue",
     "views/tab",
-    "text!resources/templates/main.html"
+    "text!resources/templates/main.html",
+    "utils/date"
 ], function(_, $, Q, hr, args, auth, api, GridView, RepositoriesView, IssuesView, IssueView, TabView, templateMain) {
     // Configure hr
     hr.configure(args);
@@ -149,9 +150,12 @@ require([
 
         // State (issue/repo) changed
         onStateChanges: function() {
+            var _pIssues = this.tabIssues._gridOptions.enabled;
+            var _pIssue = this.issue._gridOptions.enabled;
+
             this.tabIssues._gridOptions.enabled = this.currentRepo != null;
             this.issue._gridOptions.enabled = (this.currentRepo != null && this.currentIssue != null);
-            this.grid.update();
+            if (_pIssues != this.tabIssues._gridOptions.enabled || _pIssue != this.issue._gridOptions.enabled) this.grid.update();
         }
     });
 

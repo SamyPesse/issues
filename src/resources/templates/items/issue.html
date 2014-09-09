@@ -6,6 +6,7 @@
 <% } %>
 <div class="infos">
     <h2><%- issue.get("title") %></h2>
+    <p>#<%- issue.get("number") %> opened <%- $date.relative(issue.get("created_at")) %> by <a href="<%- issue.get("user.html_url") %>" target="_blank"><%- issue.get("user.login") %></a></p>
 
     <div class="labels">
     <% _.each(issue.get("labels"), function(label) { %>

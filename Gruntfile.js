@@ -54,7 +54,9 @@ module.exports = function (grunt) {
                 "style": path.resolve(srcPath, "resources/stylesheets/main.less"),
 
                 // Modules paths
-                'paths': {},
+                'paths': {
+                    "moment": path.resolve(srcPath, "vendors/moment/moment")
+                },
                 "shim": {},
                 'args': {},
                 'options': {}
