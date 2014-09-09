@@ -26,7 +26,8 @@ require([
             "submit .screen-login .form": "onLoginSubmit"
         },
         routes: {
-            ":login/:repo": "onRepoChange"
+            ":login/:repo": "onRepoChange",
+            ":login/:repo/issues/:issue": "onissueChange"
         },
 
         initialize: function() {
@@ -87,9 +88,21 @@ require([
             this.trigger("state:repo", this.currentRepo);
         },
 
-        // Route change
+        // Define current issue
+        setCurrentIssue: function(issue) {
+            if (this.currentIssue == issue) return;
+
+            this.currentIssue = issue;
+            this.trigger("state:issue", this.currentIssue);
+        },
+
+        // Routes changements:
         onRepoChange: function(login, repo) {
-            this.setCurrentRepo(login+"/"+repo)
+            this.setCurrentRepo(login+"/"+repo);
+        },
+        onissueChange: function(login, repo, issue) {
+            this.setCurrentRepo(login+"/"+repo);
+            this.setCurrentIssue(issue);
         },
 
         // Submit on login form

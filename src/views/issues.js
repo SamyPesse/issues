@@ -34,7 +34,7 @@ define([
         onClick: function(e) {
             if (e) e.preventDefault();
 
-            hr.History.navigate("issues/"+this.model.id);
+            hr.History.navigate(hr.app.currentRepo+"/issues/"+this.model.id);
         }
     });
 
