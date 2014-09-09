@@ -3,7 +3,7 @@ define([
     "hr/dom",
     "hr/hr",
     "models/issue",
-    "text!resources/templates/items/issue.html"
+    "text!resources/templates/issue.html"
 ], function(_, $, hr, Issue, templateMain) {
 
     var IssueView = hr.View.extend({
