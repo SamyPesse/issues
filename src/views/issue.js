@@ -11,6 +11,7 @@ define([
         className: "issue",
         template: templateMain,
         events: {
+            "submit .issue-controls form": "onSubmitComment",
             "keyup .issue-controls textarea": "onKeyupComment"
         },
 
@@ -42,6 +43,15 @@ define([
         // When the current issue change
         onIssueChange: function(issue) {
             return this.model.loadByNumber(hr.app.currentRepo, issue);
+        },
+
+        // When submiting comment form
+        onSubmitComment: function(e) {
+            if (e) e.preventDefault();
+
+            this.model.postComment(this.$(".issue-controls textarea").val())
+            .then(this.update.bind(this))
+            .fail(alert);
         },
 
         // When typing in the comment area
