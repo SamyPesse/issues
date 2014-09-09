@@ -59,6 +59,8 @@ require([
                 auth.set(username, password);
 
                 return that.update();
+            }, function() {
+                that.$(".screen-login .form-message").text("Invalid username or password.").show();
             });
         }
     });
