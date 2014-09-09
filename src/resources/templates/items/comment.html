@@ -1,1 +1,6 @@
-<%- comment.get("body") %>
+<div class="comment-header">
+    <a href="<%- comment.get("user.html_url") %>" target="_blank"><b><%- comment.get("user.login") %></b></a> commented <%- $date.relative(comment.get("created_at")) %>
+</div>
+<div class="comment-body markdown-content">
+<%= $markdown.parse(comment.get("body")) %>
+</div>

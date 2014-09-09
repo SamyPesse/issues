@@ -1,7 +1,8 @@
 define([
     "hr/hr",
+    "utils/markdown",
     "backends/api"
-], function(hr, api) {
+], function(hr, markdown, api) {
     /* Documentation: https://developer.github.com/v3/issues/comments/ */
 
     var Comment = hr.Model.extend({

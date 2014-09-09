@@ -55,7 +55,8 @@ module.exports = function (grunt) {
 
                 // Modules paths
                 'paths': {
-                    "moment": path.resolve(srcPath, "vendors/moment/moment")
+                    "moment": path.resolve(srcPath, "vendors/moment/moment"),
+                    "marked": path.resolve(srcPath, "vendors/marked/lib/marked")
                 },
                 "shim": {},
                 'args': {},

@@ -2,6 +2,7 @@
     "name": "issues",
     "dependencies": {
         "octicons": "2.0.2",
-        "moment": "2.7.0"
+        "moment": "2.7.0",
+        "marked": "0.3.2"
     }
 }

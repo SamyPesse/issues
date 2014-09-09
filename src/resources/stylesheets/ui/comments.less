@@ -1,0 +1,24 @@
+.comments {
+    list-style: none;
+    margin: 0px;
+    padding: 0px;
+
+    .comment {
+        border-bottom: 1px solid @comment-delimiter-color;
+
+        .comment-header {
+            padding: 4px;
+            background: @comment-header-background;
+            color: @comment-header-color;
+            border-bottom: 1px solid #eee;
+
+            b {
+                color: #444;
+            }
+        }
+
+        .comment-body {
+            padding: 4px;
+        }
+    }
+}
