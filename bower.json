@@ -1,0 +1,6 @@
+{
+    "name": "issues",
+    "dependencies": {
+        "octicons": "2.0.2"
+    }
+}
