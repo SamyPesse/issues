@@ -68,10 +68,6 @@ require([
             this.issue = new IssueView();
             this.issue.listenTo(this, "state:issue", this.issue.onIssueChange);
             this.grid.addView(this.issue);
-
-            // State of UI
-            this.listenTo(this, "state", this.onStateChanges);
-            this.onStateChanges();
         },
 
         templateContext: function() {
@@ -94,6 +90,7 @@ require([
                 this.repositories.collection.loadForUser();
                 this.tabRepos.update();
                 this.tabIssues.update();
+                this.issue.update();
             }
 
             return Application.__super__.finish.apply(this, arguments);
@@ -146,16 +143,6 @@ require([
             }, function() {
                 that.$(".screen-login .form-message").text("Invalid username or password.").show();
             });
-        },
-
-        // State (issue/repo) changed
-        onStateChanges: function() {
-            var _pIssues = this.tabIssues._gridOptions.enabled;
-            var _pIssue = this.issue._gridOptions.enabled;
-
-            this.tabIssues._gridOptions.enabled = this.currentRepo != null;
-            this.issue._gridOptions.enabled = (this.currentRepo != null && this.currentIssue != null);
-            if (_pIssues != this.tabIssues._gridOptions.enabled || _pIssue != this.issue._gridOptions.enabled) this.grid.update();
         }
     });
 

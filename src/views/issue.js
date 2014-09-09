@@ -22,7 +22,7 @@ define([
             this.model = new Issue();
             this.comments = new CommentsView({}, this);
 
-            this.listenTo(this.model, "set", this.update);
+            this.listenTo(this.model, "set clear", this.update);
         },
 
         templateContext: function() {
@@ -43,6 +43,10 @@ define([
 
         // When the current issue change
         onIssueChange: function(issue) {
+            if (!issue) {
+                console.log("clear issue");
+                return this.model.clear();
+            }
             return this.model.loadByNumber(hr.app.currentRepo, issue);
         },
 

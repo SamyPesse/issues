@@ -41,7 +41,14 @@ define([
     var RepositoriesView = hr.List.extend({
         Item: RepositoryItem,
         className: "repositories",
-        Collection: Repositories
+        Collection: Repositories,
+
+        displayEmptyList: function() {
+            return $("<div>", {
+                "class": "tab-empty",
+                "html": '<div class="icon"><span class="octicon octicon-mark-github"></span></div>No repositories'
+            });
+        },
     });
 
     return RepositoriesView;

@@ -1,9 +1,12 @@
 <div class="tab">
     <div class="tab-header">
+        <% if (issue.get("number")) {%>
         <a href="<%- issue.get("html_url") %>" class="button pull-right" target="_blank"><span class="octicon octicon-link-external"></span></a>
-        <span class="title">Issue #<%- issue.get("number") %></span>
+        <% } %>
+        <span class="title">Issue<% if (issue.get("number")) {%> #<%- issue.get("number") %><% } %></span>
     </div>
     <div class="tab-content">
+        <% if (issue.get("number")) {%>
         <div class="issue-intro">
             <h2><%- issue.get("title") %></h2>
             <p><a href="<%- issue.get("user.html_url") %>" target="_blank"><%- issue.get("user.login") %></a> opened this issue <%- $date.relative(issue.get("created_at")) %>  ·  <%- issue.get("comments") %> comments</p>
@@ -22,5 +25,11 @@
                 </div>
             </form>
         </div>
+        <% } else { %>
+        <div class="tab-empty">
+            <div class="icon"><span class="octicon octicon-issue-opened"></span></div>
+            Select an issue
+        </div>
+        <% } %>
     </div>
 </div>

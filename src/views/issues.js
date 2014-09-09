@@ -41,7 +41,14 @@ define([
     var IssuesView = hr.List.extend({
         Item: IssueItem,
         className: "issues",
-        Collection: Issues
+        Collection: Issues,
+
+        displayEmptyList: function() {
+            return $("<div>", {
+                "class": "tab-empty",
+                "html": '<div class="icon"><span class="octicon octicon-repo"></span></div>Select a repsoitory'
+            });
+        },
     });
 
     return IssuesView;
