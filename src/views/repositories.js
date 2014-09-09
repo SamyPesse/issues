@@ -8,6 +8,9 @@ define([
     var RepositoryItem = hr.List.Item.extend({
         className: "repository-item",
         template: templateMain,
+        events: {
+            "click": "onClick"
+        },
 
         initialize: function(options) {
             RepositoryItem.__super__.initialize.apply(this, arguments);
@@ -16,6 +19,13 @@ define([
             return {
                 repo: this.model
             };
+        },
+
+        // On click on th repo
+        onClick: function(e) {
+            if (e) e.preventDefault();
+
+            hr.History.navigate(this.model.get("full_name"));
         }
     });
 
