@@ -17,6 +17,15 @@ define([
         };
     };
 
+    // Define auth infos
+    var set = function(_username, _password) {
+        username = _username;
+        password = _password;
+
+        hr.Storage.set("username", username);
+        hr.Storage.set("password", password);
+    };
+
     // Initialize the auth backend
     var init = function() {
         username = hr.Storage.get("username");
@@ -28,6 +37,7 @@ define([
     return {
         init: init,
         get: get,
+        set: set,
         isAuth: isAuth
     };
 });
