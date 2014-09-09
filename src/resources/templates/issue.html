@@ -1,6 +1,9 @@
 <div class="image">
     <img src="<%- issue.get("user.avatar_url") %>" />
 </div>
+<% if (issue.get("comments") > 0) { %>
+    <div class="badge"><%- issue.get("comments") %></div>
+<% } %>
 <div class="infos">
     <p class="primary"><%- issue.get("title") %></p>
 
