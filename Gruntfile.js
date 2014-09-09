@@ -100,6 +100,7 @@ module.exports = function (grunt) {
 
     // Publish
     grunt.registerTask('publish', [
+        'build',
         'gh-pages'
     ]);
 
