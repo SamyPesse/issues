@@ -66,6 +66,7 @@ require([
 
             // Current issue
             this.issue = new IssueView();
+            this.issue.listenTo(this, "state:issue", this.issue.onIssueChange);
             this.grid.addView(this.issue);
 
             // State of UI
@@ -93,7 +94,6 @@ require([
                 this.repositories.collection.loadForUser();
                 this.tabRepos.update();
                 this.tabIssues.update();
-                this.issue.update();
             }
 
             return Application.__super__.finish.apply(this, arguments);

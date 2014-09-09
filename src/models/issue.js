@@ -8,6 +8,11 @@ define([
         idAttribute: "number",
         defaults: {
 
+        },
+
+        // Load a specific issue
+        loadByNumber: function(repo, issue) {
+            return api.execute("get:repos/"+repo+"/issues/"+issue).then(this.set.bind(this));
         }
     });
 
