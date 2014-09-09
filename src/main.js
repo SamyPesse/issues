@@ -51,6 +51,8 @@ require([
         },
 
         render: function() {
+            if (!hr.History.started) this.router.start();
+
             this.grid.detach();
 
             return Application.__super__.render.apply(this, arguments);
