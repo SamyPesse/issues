@@ -14,6 +14,9 @@ define([
 
         initialize: function(options) {
             RepositoryItem.__super__.initialize.apply(this, arguments);
+
+            this.listenTo(hr.app, "state:repo", this.onActiveChange);
+            this.onActiveChange(hr.app.currentRepo);
         },
         templateContext: function() {
             return {
@@ -21,11 +24,16 @@ define([
             };
         },
 
-        // On click on th repo
+        // When active repo changed
+        onActiveChange: function(repo) {
+            this.$el.toggleClass("active", this.model.id == repo);
+        },
+
+        // When click on the repo
         onClick: function(e) {
             if (e) e.preventDefault();
 
-            hr.History.navigate(this.model.get("full_name"));
+            hr.History.navigate(this.model.id);
         }
     });
 

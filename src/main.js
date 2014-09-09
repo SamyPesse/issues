@@ -25,11 +25,15 @@ require([
             "submit .screen-login .form": "onLoginSubmit"
         },
         routes: {
-            "": "onRouteChange"
+            ":login/:repo": "onRepoChange"
         },
 
         initialize: function() {
             Application.__super__.initialize.apply(this, arguments);
+
+            // Current states
+            this.currentRepo = null;
+            this.currentIssue = null;
 
             // Main grid
             this.grid = new GridView({
@@ -67,9 +71,17 @@ require([
             return Application.__super__.finish.apply(this, arguments);
         },
 
+        // Define current repo
+        setCurrentRepo: function(repo) {
+            if (this.currentRepo == repo) return;
+
+            this.currentRepo = repo;
+            this.trigger("state:repo", this.currentRepo);
+        },
+
         // Route change
-        onRouteChange: function(path) {
-            console.log("route change", arguments);
+        onRepoChange: function(login, repo) {
+            this.setCurrentRepo(login+"/"+repo)
         },
 
         // Submit on login form
