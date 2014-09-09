@@ -6,8 +6,9 @@ require([
     "hr/args",
     "backends/auth",
     "backends/api",
+    "views/grid",
     "text!resources/templates/main.html"
-], function(_, $, Q, hr, args, auth, api, templateMain) {
+], function(_, $, Q, hr, args, auth, api, GridView, templateMain) {
     // Configure hr
     hr.configure(args);
 
@@ -28,12 +29,35 @@ require([
 
         initialize: function() {
             Application.__super__.initialize.apply(this, arguments);
+
+            // Main grid
+            this.grid = new GridView({
+                columns: 3
+            }, this);
+
+            this.grid.addView(new hr.View(), {width: 25});
+            this.grid.addView(new hr.View());
+            this.grid.addView(new hr.View());
         },
 
         templateContext: function() {
             return {
                 'isAuth': auth.isAuth()
             }
+        },
+
+        render: function() {
+            this.grid.detach();
+
+            return Application.__super__.render.apply(this, arguments);
+        },
+
+        finish: function() {
+            if (auth.isAuth()) {
+                this.grid.appendTo(this.$(".screen-manager"));
+            }
+
+            return Application.__super__.finish.apply(this, arguments);
         },
 
         // Route change
