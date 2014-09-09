@@ -28,7 +28,7 @@ define([
 
         render: function() {
             this.comments.detach();
-            this.comments.collection.loadForIssue(hr.app.currentRepo, this.model.id);
+            this.comments.collection.loadForIssue(hr.app.currentRepo, this.model);
             return IssueView.__super__.render.apply(this, arguments);
         },
         finish: function() {

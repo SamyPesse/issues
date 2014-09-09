@@ -12,7 +12,21 @@ define([
 
         // Load comments for an issue
         loadForIssue: function(repo, issue) {
-            return api.execute("get:repos/"+repo+"/issues/"+issue+"/comments").then(this.reset.bind(this));
+            var that = this;
+
+            return api.execute("get:repos/"+repo+"/issues/"+issue.id+"/comments")
+            .then(function(comments) {
+                comments.unshift({
+                    "id": 0,
+                    "html_url": issue.get("html_url"),
+                    "body": issue.get("body"),
+                    "user": issue.get("user"),
+                    "created_at": issue.get("created_at"),
+                    "updated_at": issue.get("updated_at")
+                });
+
+                that.reset(comments);
+            });
         }
     });
 
