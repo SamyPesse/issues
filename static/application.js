@@ -23972,7 +23972,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1410296589378,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1410302402252,"baseUrl":"/"}; });
 define('backends/auth',[
     "hr/hr",
     "hr/promise"
@@ -25262,7 +25262,14 @@ define('views/repositories',[
     var RepositoriesView = hr.List.extend({
         Item: RepositoryItem,
         className: "repositories",
-        Collection: Repositories
+        Collection: Repositories,
+
+        displayEmptyList: function() {
+            return $("<div>", {
+                "class": "tab-empty",
+                "html": '<div class="icon"><span class="octicon octicon-mark-github"></span></div>No repositories'
+            });
+        },
     });
 
     return RepositoriesView;
@@ -25279,9 +25286,44 @@ define('models/issue',[
 
         },
 
+        // Return repo id for this issue
+        repoId: function() {
+            var url = this.get("url");
+            url = url.split("/");
+            return url[4]+"/"+url[5];
+        },
+
+        // Return true if the issue is open
+        isOpen: function() {
+            return (this.get("state") == "open");
+        },
+
         // Load a specific issue
         loadByNumber: function(repo, issue) {
             return api.execute("get:repos/"+repo+"/issues/"+issue).then(this.set.bind(this));
+        },
+
+        // Post a comment on an issue
+        postComment: function(body) {
+            return api.execute("post:repos/"+this.repoId()+"/issues/"+this.id+"/comments", {
+                'body': body
+            });
+        },
+
+        // Edit this issue
+        editIssue: function(data) {
+            return api.execute("post:repos/"+this.repoId()+"/issues/"+this.id, data);
+        },
+
+        // Close an issue
+        toggleIssue: function(state) {
+            if (state == null) {
+                state = ((this.get("state") == "open")? false : true);
+            }
+
+            return this.editIssue({
+                'state': (state? "open" : "closed")
+            });
         }
     });
 
@@ -25352,7 +25394,14 @@ define('views/issues',[
     var IssuesView = hr.List.extend({
         Item: IssueItem,
         className: "issues",
-        Collection: Issues
+        Collection: Issues,
+
+        displayEmptyList: function() {
+            return $("<div>", {
+                "class": "tab-empty",
+                "html": '<div class="icon"><span class="octicon octicon-repo"></span></div>Select a repsoitory'
+            });
+        },
     });
 
     return IssuesView;
@@ -26691,7 +26740,7 @@ define('collections/comments',[
 
     return Comments;
 });
-define('text!resources/templates/items/comment.html',[],function () { return '<div class="comment-header">\n    <a href="<%- comment.get("user.html_url") %>" target="_blank"><b><%- comment.get("user.login") %></b></a> commented <%- $date.relative(comment.get("created_at")) %>\n</div>\n<div class="comment-body markdown-content">\n<%= $markdown.parse(comment.get("body")) %>\n</div>\n';});
+define('text!resources/templates/items/comment.html',[],function () { return '<div class="comment-header">\n    <a href="<%- comment.get("user.html_url") %>" target="_blank"><b><%- comment.get("user.login") %></b></a> commented <%- $date.relative(comment.get("created_at")) %>\n</div>\n<div class="comment-body markdown-content">\n<%= $markdown.parse(comment.get("body") || "_No description provided._") %>\n</div>\n';});
 
 define('views/comments',[
     "hr/utils",
@@ -26726,7 +26775,7 @@ define('views/comments',[
 
     return CommentsView;
 });
-define('text!resources/templates/issue.html',[],function () { return '<div class="tab">\n    <div class="tab-header">\n        <span class="title">Issue #<%- issue.get("number") %></span>\n    </div>\n    <div class="tab-content">\n        <div class="issue-intro">\n            <h2><%- issue.get("title") %></h2>\n            <p><a href="<%- issue.get("user.html_url") %>" target="_blank"><%- issue.get("user.login") %></a> opened this issue <%- $date.relative(issue.get("created_at")) %>  ·  <%- issue.get("comments") %> comments</p>\n        </div>\n        <div class="issue-comments"></div>\n    </div>\n</div>';});
+define('text!resources/templates/issue.html',[],function () { return '<div class="tab">\n    <div class="tab-header">\n        <% if (issue.get("number")) {%>\n        <a href="<%- issue.get("html_url") %>" class="button pull-right" target="_blank"><span class="octicon octicon-link-external"></span></a>\n        <% } %>\n        <span class="title">Issue<% if (issue.get("number")) {%> #<%- issue.get("number") %><% } %></span>\n    </div>\n    <div class="tab-content">\n        <% if (issue.get("number")) {%>\n        <div class="issue-intro">\n            <h2><%- issue.get("title") %></h2>\n            <p><a href="<%- issue.get("user.html_url") %>" target="_blank"><%- issue.get("user.login") %></a> opened this issue <%- $date.relative(issue.get("created_at")) %>  ·  <%- issue.get("comments") %> comments</p>\n        </div>\n        <div class="issue-comments"></div>\n        <div class="issue-controls">\n            <form class="form">\n                <div class="form-control">\n                    <textarea name="body" placeholder="Leave a comment"></textarea>\n                </div>\n                <div class="form-control clearfix">\n                    <div class="buttons-toolbar pull-right">\n                        <button class="button button-default action-toggle"><%- (issue.isOpen()? "Close" : "Open") %> issue</button>\n                        <button class="button button-success">Comment</button>\n                    </div>\n                </div>\n            </form>\n        </div>\n        <% } else { %>\n        <div class="tab-empty">\n            <div class="icon"><span class="octicon octicon-issue-opened"></span></div>\n            Select an issue\n        </div>\n        <% } %>\n    </div>\n</div>';});
 
 define('views/issue',[
     "hr/utils",
@@ -26740,6 +26789,11 @@ define('views/issue',[
     var IssueView = hr.View.extend({
         className: "issue",
         template: templateMain,
+        events: {
+            "click .action-toggle": "onToggleIssue",
+            "submit .issue-controls form": "onSubmitComment",
+            "keyup .issue-controls textarea": "onKeyupComment"
+        },
 
         initialize: function(options) {
             IssueView.__super__.initialize.apply(this, arguments);
@@ -26747,7 +26801,7 @@ define('views/issue',[
             this.model = new Issue();
             this.comments = new CommentsView({}, this);
 
-            this.listenTo(this.model, "set", this.update);
+            this.listenTo(this.model, "set clear", this.update);
         },
 
         templateContext: function() {
@@ -26768,7 +26822,45 @@ define('views/issue',[
 
         // When the current issue change
         onIssueChange: function(issue) {
+            if (!issue) {
+                console.log("clear issue");
+                return this.model.clear();
+            }
             return this.model.loadByNumber(hr.app.currentRepo, issue);
+        },
+
+        // When submiting comment form
+        onSubmitComment: function(e) {
+            if (e) e.preventDefault();
+
+            return this.model.postComment(this.$(".issue-controls textarea").val())
+            .then(this.update.bind(this))
+            .fail(alert);
+        },
+
+        // When typing in the comment area
+        onKeyupComment: function(e) {
+            this.$(".issue-controls .action-toggle").text((this.model.isOpen()? "Close" : "Open")+(($(e.currentTarget).val().length > 0)? " and comment" : " issue"));
+        },
+
+        // When toggling issue
+        onToggleIssue: function(e) {
+            if (e) e.preventDefault();
+
+            var that = this;
+
+            Q()
+            .then(function() {
+                if (that.$(".issue-controls textarea").val().length > 0) {
+                    return that.onSubmitComment();
+                }
+            })
+            .then(function() {
+                return that.model.toggleIssue();
+            })
+            .then(function() {
+                return that.onIssueChange(that.model.id);
+            });
         }
     });
 
@@ -29507,10 +29599,6 @@ require([
             this.issue = new IssueView();
             this.issue.listenTo(this, "state:issue", this.issue.onIssueChange);
             this.grid.addView(this.issue);
-
-            // State of UI
-            this.listenTo(this, "state", this.onStateChanges);
-            this.onStateChanges();
         },
 
         templateContext: function() {
@@ -29533,6 +29621,7 @@ require([
                 this.repositories.collection.loadForUser();
                 this.tabRepos.update();
                 this.tabIssues.update();
+                this.issue.update();
             }
 
             return Application.__super__.finish.apply(this, arguments);
@@ -29585,16 +29674,6 @@ require([
             }, function() {
                 that.$(".screen-login .form-message").text("Invalid username or password.").show();
             });
-        },
-
-        // State (issue/repo) changed
-        onStateChanges: function() {
-            var _pIssues = this.tabIssues._gridOptions.enabled;
-            var _pIssue = this.issue._gridOptions.enabled;
-
-            this.tabIssues._gridOptions.enabled = this.currentRepo != null;
-            this.issue._gridOptions.enabled = (this.currentRepo != null && this.currentIssue != null);
-            if (_pIssues != this.tabIssues._gridOptions.enabled || _pIssue != this.issue._gridOptions.enabled) this.grid.update();
         }
     });
 
