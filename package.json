@@ -14,5 +14,17 @@
     },
     "peerDependencies": {
         "grunt": "~0.4.1"
+    },
+    "main": "build/index.html",
+    "nodejs": false,
+    "window": {
+        "title": "GitHub Issues Manager",
+        "width": 1200,
+        "height": 600,
+        "icon": "build/static/images/icons/128.png",
+        "position": "center",
+        "show": true,
+        "toolbar": false,
+        "frame": true
     }
 }
