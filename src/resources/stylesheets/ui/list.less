@@ -15,6 +15,21 @@
 
         &.active {
             background: @brand-success;
+            border-color: @brand-success;
+            border-top:1px solid;
+            margin-top: -1px;
+            color: #fff;
+
+            .badge {
+                background: #fff;
+                color: @brand-success;
+            }
+
+            .infos {
+                p {
+                    color: #eee;
+                }
+            }
         }
 
         .badge {
@@ -26,6 +41,7 @@
             line-height: 100%;
             padding: 6px;
             margin: 11px 0px;
+            margin-left: 4px;
         }
 
         .image {
