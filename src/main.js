@@ -10,8 +10,9 @@ require([
     "views/repositories",
     "views/issues",
     "views/issue",
+    "views/tab",
     "text!resources/templates/main.html"
-], function(_, $, Q, hr, args, auth, api, GridView, RepositoriesView, IssuesView, IssueView, templateMain) {
+], function(_, $, Q, hr, args, auth, api, GridView, RepositoriesView, IssuesView, IssueView, TabView, templateMain) {
     // Configure hr
     hr.configure(args);
 
@@ -45,14 +46,22 @@ require([
 
             // List of repositories
             this.repositories = new RepositoriesView();
-            this.grid.addView(this.repositories, { width: 20 });
+            this.tabRepos = new TabView({
+                title: "Repos",
+                content: this.repositories
+            });
+            this.grid.addView(this.tabRepos, { width: 20 });
 
             // List of issues
             this.issues = new IssuesView();
             this.issues.listenTo(this, "state:repo", function(repo) {
                 this.collection.loadForRepo(repo);
             });
-            this.grid.addView(this.issues, { width: 35 });
+            this.tabIssues = new TabView({
+                title: "Issues",
+                content: this.issues
+            });
+            this.grid.addView(this.tabIssues, { width: 35 });
 
             // Current issue
             this.issue = new IssueView();
@@ -81,6 +90,8 @@ require([
             if (auth.isAuth()) {
                 this.grid.appendTo(this.$(".screen-manager"));
                 this.repositories.collection.loadForUser();
+                this.tabRepos.update();
+                this.tabIssues.update();
                 this.issue.update();
             }
 
@@ -137,7 +148,7 @@ require([
 
         // State (issue/repo) changed
         onStateChanges: function() {
-            this.issues._gridOptions.enabled = this.currentRepo != null;
+            this.tabIssues._gridOptions.enabled = this.currentRepo != null;
             this.issue._gridOptions.enabled = (this.currentRepo != null && this.currentIssue != null);
             this.grid.update();
         }

@@ -1,0 +1,40 @@
+.tab {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+
+    .tab-header {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        height: 44px;
+
+        overflow: hidden;
+        margin: 0px;
+        padding: 5px;
+
+        text-align: center;
+
+        color: #444;
+        background: #f8f8f8;
+        border-bottom: 1px solid #b2b2b2;
+
+        .title {
+            margin: 4px 0;
+            display: inline-block;
+        }
+    }
+
+    .tab-content {
+        position: absolute;
+        top: 44px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        overflow-y: auto;
+        background: @background-color;
+    }
+}
