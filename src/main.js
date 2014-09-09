@@ -117,6 +117,7 @@ require([
         // Routes changements:
         onRepoChange: function(login, repo) {
             this.setCurrentRepo(login+"/"+repo);
+            this.setCurrentIssue(null);
         },
         onissueChange: function(login, repo, issue) {
             this.setCurrentRepo(login+"/"+repo);
