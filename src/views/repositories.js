@@ -3,7 +3,7 @@ define([
     "hr/dom",
     "hr/hr",
     "collections/repositories",
-    "text!resources/templates/repository.html"
+    "text!resources/templates/items/repository.html"
 ], function(_, $, hr, Repositories, templateMain) {
 
     var RepositoryItem = hr.List.Item.extend({

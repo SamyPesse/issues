@@ -9,8 +9,9 @@ require([
     "views/grid",
     "views/repositories",
     "views/issues",
+    "views/issue",
     "text!resources/templates/main.html"
-], function(_, $, Q, hr, args, auth, api, GridView, Repositories, Issues, templateMain) {
+], function(_, $, Q, hr, args, auth, api, GridView, RepositoriesView, IssuesView, IssueView, templateMain) {
     // Configure hr
     hr.configure(args);
 
@@ -43,18 +44,19 @@ require([
             }, this);
 
             // List of repositories
-            this.repositories = new Repositories();
+            this.repositories = new RepositoriesView();
             this.grid.addView(this.repositories, { width: 20 });
 
             // List of issues
-            this.issues = new Issues();
+            this.issues = new IssuesView();
             this.issues.listenTo(this, "state:repo", function(repo) {
                 this.collection.loadForRepo(repo);
-            })
+            });
             this.grid.addView(this.issues, { width: 35 });
 
-
-            this.grid.addView(new hr.View());
+            // Current issue
+            this.issue = new IssueView();
+            this.grid.addView(this.issue);
         },
 
         templateContext: function() {
