@@ -1,0 +1,24 @@
+<% if (!isAuth) { %>
+<div class="screen-login">
+    <div class="dialog">
+        <div class="inner">
+            <div class="logo">
+                <i class="octicon octicon-mark-github"></i>
+            </div>
+            <form class="form">
+                <div class="form-control">
+                    <input type="text" name="username" placeholder="Username" />
+                </div>
+                <div class="form-control">
+                    <input type="password" name="password" placeholder="Password" />
+                </div>
+                <div class="form-control">
+                    <button class="button button-success button-block">Log in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<% } else { %>
+
+<% } %>
