@@ -10,6 +10,9 @@ define([
     var IssueView = hr.View.extend({
         className: "issue",
         template: templateMain,
+        events: {
+            "keyup .issue-controls textarea": "onKeyupComment"
+        },
 
         initialize: function(options) {
             IssueView.__super__.initialize.apply(this, arguments);
@@ -39,6 +42,11 @@ define([
         // When the current issue change
         onIssueChange: function(issue) {
             return this.model.loadByNumber(hr.app.currentRepo, issue);
+        },
+
+        // When typing in the comment area
+        onKeyupComment: function(e) {
+            this.$(".issue-controls .action-close").text(($(e.currentTarget).val().length > 0)? "Close and comment" : "Close issue");
         }
     });
 
