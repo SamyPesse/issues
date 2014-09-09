@@ -3,4 +3,10 @@
 </div>
 <div class="infos">
     <p class="primary"><%- issue.get("title") %></p>
+
+    <div class="labels">
+    <% _.each(issue.get("labels"), function(label) { %>
+        <span class="label" style="background: #<%- label.color %>"><%- label.name %></span>
+    <% }); %>
+    </div>
 </div>
