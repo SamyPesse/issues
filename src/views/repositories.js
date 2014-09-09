@@ -5,6 +5,7 @@ define([
     "collections/repositories",
     "text!resources/templates/repository.html"
 ], function(_, $, hr, Repositories, templateMain) {
+
     var RepositoryItem = hr.List.Item.extend({
         className: "repository-item",
         template: templateMain,

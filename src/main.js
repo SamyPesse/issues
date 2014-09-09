@@ -8,8 +8,9 @@ require([
     "backends/api",
     "views/grid",
     "views/repositories",
+    "views/issues",
     "text!resources/templates/main.html"
-], function(_, $, Q, hr, args, auth, api, GridView, Repositories, templateMain) {
+], function(_, $, Q, hr, args, auth, api, GridView, Repositories, Issues, templateMain) {
     // Configure hr
     hr.configure(args);
 
@@ -42,9 +43,16 @@ require([
 
             // List of repositories
             this.repositories = new Repositories();
+            this.grid.addView(this.repositories, { width: 20 });
 
-            this.grid.addView(this.repositories, {width: 25});
-            this.grid.addView(new hr.View());
+            // List of issues
+            this.issues = new Issues();
+            this.issues.listenTo(this, "state:repo", function(repo) {
+                this.collection.loadForRepo(repo);
+            })
+            this.grid.addView(this.issues, { width: 35 });
+
+
             this.grid.addView(new hr.View());
         },
 
