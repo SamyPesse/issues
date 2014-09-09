@@ -27,7 +27,7 @@ define([
 
             // Get auth infos for the request
             var authInfos = null;
-            if (auth.isAuth()) auth.get();
+            if (auth.isAuth()) authInfos = auth.get();
             if (options.auth) authInfos = options.auth;
             if (authInfos) options.headers['Authorization'] = 'Basic ' + hash.btoa(authInfos.username + ':' + authInfos.password)
 

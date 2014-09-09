@@ -7,8 +7,9 @@ require([
     "backends/auth",
     "backends/api",
     "views/grid",
+    "views/repositories",
     "text!resources/templates/main.html"
-], function(_, $, Q, hr, args, auth, api, GridView, templateMain) {
+], function(_, $, Q, hr, args, auth, api, GridView, Repositories, templateMain) {
     // Configure hr
     hr.configure(args);
 
@@ -35,7 +36,10 @@ require([
                 columns: 3
             }, this);
 
-            this.grid.addView(new hr.View(), {width: 25});
+            // List of repositories
+            this.repositories = new Repositories();
+
+            this.grid.addView(this.repositories, {width: 25});
             this.grid.addView(new hr.View());
             this.grid.addView(new hr.View());
         },
@@ -55,6 +59,7 @@ require([
         finish: function() {
             if (auth.isAuth()) {
                 this.grid.appendTo(this.$(".screen-manager"));
+                this.repositories.collection.loadForUser();
             }
 
             return Application.__super__.finish.apply(this, arguments);
