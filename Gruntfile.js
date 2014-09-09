@@ -10,6 +10,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-hr-builder');
     grunt.loadNpmTasks("grunt-bower-install-simple");
     grunt.loadNpmTasks('grunt-http-server');
+    grunt.loadNpmTasks('grunt-gh-pages');
 
     // Init GRUNT configuraton
     grunt.initConfig({
@@ -20,6 +21,12 @@ module.exports = function (grunt) {
                 production:  false,
                 directory:   "src/vendors"
             }
+        },
+        "gh-pages": {
+            options: {
+                base: './build'
+            },
+            src: ['**']
         },
         "hr": {
             app: {
@@ -89,6 +96,11 @@ module.exports = function (grunt) {
     // Test
     grunt.registerTask('test', [
         'http-server:dev'
+    ]);
+
+    // Publish
+    grunt.registerTask('publish', [
+        'gh-pages'
     ]);
 
     grunt.registerTask('default', [
