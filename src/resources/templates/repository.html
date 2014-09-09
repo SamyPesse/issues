@@ -1,1 +1,7 @@
-<%- repo.get("name") %>
+<div class="image">
+    <img src="<%- repo.get("owner.avatar_url") %>" />
+</div>
+<div class="infos">
+    <p class="name"><%- repo.get("name") %></p>
+    <p class="owner"><%- repo.get("owner.login") %></p>
+</div>
