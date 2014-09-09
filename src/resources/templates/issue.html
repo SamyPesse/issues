@@ -16,7 +16,7 @@
                 </div>
                 <div class="form-control clearfix">
                     <div class="buttons-toolbar pull-right">
-                        <button class="button button-default action-close">Close issue</button>
+                        <button class="button button-default action-toggle"><%- (issue.isOpen()? "Close" : "Open") %> issue</button>
                         <button class="button button-success">Comment</button>
                     </div>
                 </div>

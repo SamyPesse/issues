@@ -11,6 +11,7 @@ define([
         className: "issue",
         template: templateMain,
         events: {
+            "click .action-toggle": "onToggleIssue",
             "submit .issue-controls form": "onSubmitComment",
             "keyup .issue-controls textarea": "onKeyupComment"
         },
@@ -49,14 +50,34 @@ define([
         onSubmitComment: function(e) {
             if (e) e.preventDefault();
 
-            this.model.postComment(this.$(".issue-controls textarea").val())
+            return this.model.postComment(this.$(".issue-controls textarea").val())
             .then(this.update.bind(this))
             .fail(alert);
         },
 
         // When typing in the comment area
         onKeyupComment: function(e) {
-            this.$(".issue-controls .action-close").text(($(e.currentTarget).val().length > 0)? "Close and comment" : "Close issue");
+            this.$(".issue-controls .action-toggle").text((this.model.isOpen()? "Close" : "Open")+(($(e.currentTarget).val().length > 0)? " and comment" : " issue"));
+        },
+
+        // When toggling issue
+        onToggleIssue: function(e) {
+            if (e) e.preventDefault();
+
+            var that = this;
+
+            Q()
+            .then(function() {
+                if (that.$(".issue-controls textarea").val().length > 0) {
+                    return that.onSubmitComment();
+                }
+            })
+            .then(function() {
+                return that.model.toggleIssue();
+            })
+            .then(function() {
+                return that.onIssueChange(that.model.id);
+            });
         }
     });
 
