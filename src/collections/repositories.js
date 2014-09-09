@@ -9,6 +9,9 @@ define([
 
     var Repositories = hr.Collection.extend({
         model: Repository,
+        comparator: function(m) {
+            return -m.get("open_issues_count");
+        },
 
         // Load list of repositories for a user
         loadForUser: function() {
