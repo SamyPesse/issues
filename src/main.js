@@ -60,7 +60,17 @@ require([
             });
             this.tabIssues = new TabView({
                 title: "Issues",
-                content: this.issues
+                content: this.issues,
+                actions: [
+                    {
+                        position: "right",
+                        title: "New Issue",
+                        icon: "plus",
+                        click: function() {
+
+                        }
+                    }
+                ]
             });
             this.grid.addView(this.tabIssues, { width: 35 });
 

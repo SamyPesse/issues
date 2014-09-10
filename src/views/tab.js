@@ -9,6 +9,13 @@ define([
     var TabView = hr.View.extend({
         className: "tab",
         template: templateMain,
+        defaults: {
+            content: new hr.View(),
+            actions: []
+        },
+        events: {
+            "click .action": "onClickAction"
+        },
 
         initialize: function(options) {
             TabView.__super__.initialize.apply(this, arguments);
@@ -22,7 +29,18 @@ define([
             return TabView.__super__.finish.apply(this, arguments);
         },
         templateContext: function() {
-            return this.options;
+            return {
+                title: this.options.title,
+                actions: this.options.actions,
+                cid: this.cid
+            };
+        },
+
+        // When clicking on an action
+        onClickAction: function(e) {
+            e.preventDefault();
+            var i = Number($(e.currentTarget).data("action"));
+            this.options.actions[i].click();
         }
     });
 

@@ -1,4 +1,7 @@
 <div class="tab-header">
+    <% _.each(actions, function(action, i) { %>
+    <a href="#" data-action="<%- i %>" class="button action pull-<%- action.position || "right" %>"><span class="octicon octicon-<%- action.icon %>"></span></a>
+    <% }); %>
     <span class="title"><%- title %></span>
 </div>
 <div class="tab-content"></div>
