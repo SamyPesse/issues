@@ -26,6 +26,11 @@ define([
         hr.Storage.set("password", password);
     };
 
+    // Clear auth settings
+    var clear = function() {
+        set(null, null);
+    };
+
     // Initialize the auth backend
     var init = function() {
         username = hr.Storage.get("username");
@@ -38,6 +43,7 @@ define([
         init: init,
         get: get,
         set: set,
+        clear: clear,
         isAuth: isAuth
     };
 });

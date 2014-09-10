@@ -36,6 +36,8 @@ require([
         initialize: function() {
             Application.__super__.initialize.apply(this, arguments);
 
+            var that = this;
+
             // Current states
             this.currentRepo = null;
             this.currentIssue = null;
@@ -49,7 +51,18 @@ require([
             this.repositories = new RepositoriesView();
             this.tabRepos = new TabView({
                 title: "Repos",
-                content: this.repositories
+                content: this.repositories,
+                actions: [
+                    {
+                        position: "left",
+                        title: "Change Account",
+                        icon: "mark-github",
+                        click: function() {
+                            auth.clear();
+                            that.update();
+                        }
+                    }
+                ]
             });
             this.grid.addView(this.tabRepos, { width: 20 });
 
