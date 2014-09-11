@@ -23972,7 +23972,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1410443590783,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1410444697364,"baseUrl":"/"}; });
 define('backends/auth',[
     "hr/hr",
     "hr/promise"
@@ -27290,7 +27290,7 @@ define('views/tab',[
 
     return TabView;
 });
-define('text!resources/templates/main.html',[],function () { return '<% if (!isAuth) { %>\n<div class="screen-login">\n    <div class="dialog">\n        <div class="inner">\n            <div class="logo">\n                <i class="octicon octicon-mark-github"></i>\n            </div>\n            <form class="form">\n                <div class="form-message message-danger" style="display: none;"></div>\n                <div class="form-control">\n                    <input type="text" name="username" placeholder="Username" />\n                </div>\n                <div class="form-control">\n                    <input type="password" name="password" placeholder="Password" />\n                </div>\n                <div class="form-control">\n                    <button class="button button-success button-block">Log in</button>\n                </div>\n            </form>\n        </div>\n    </div>\n</div>\n<% } else { %>\n<div class="screen-manager"></div>\n<% } %>';});
+define('text!resources/templates/main.html',[],function () { return '<% if (!isAuth) { %>\n<div class="screen-login">\n    <div class="dialog">\n        <div class="inner">\n            <h1>issues:manager</h1>\n            <form class="form">\n                <div class="form-message message-danger" style="display: none;"></div>\n                <div class="form-control">\n                    <input type="text" name="username" placeholder="GitHub Username" />\n                </div>\n                <div class="form-control">\n                    <input type="password" name="password" placeholder="GitHub Password or Access Token" />\n                    <p class="help">You can also instead <a href="https://github.com/settings/applications" target="_blank">create a token for this application</a>.</p>\n                </div>\n                <div class="form-control">\n                    <button class="button button-success button-block">Log in</button>\n                </div>\n            </form>\n        </div>\n    </div>\n</div>\n<% } else { %>\n<div class="screen-manager"></div>\n<% } %>';});
 
 //! moment.js
 //! version : 2.7.0
