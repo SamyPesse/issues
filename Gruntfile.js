@@ -53,15 +53,6 @@ module.exports = function (grunt) {
                     'build/static/images/logo/32.png': 'src/resources/images/logo/1024.png',
                 },
             },
-            logoIcns: {
-                options: {
-                    height:512,
-                    width: 512
-                },
-                files: {
-                    'build/static/images/logo/512.icns': 'src/resources/images/logo/1024.png',
-                },
-            },
             logoIco: {
                 options: {
                     height:128,
@@ -125,6 +116,10 @@ module.exports = function (grunt) {
                 runInBackground: false
             }
         },
+        'clean': {
+            build: ['build/'],
+            releases: ['appbuilds/releases/']
+        },
         'nodewebkit': {
             options: {
                 appName: pkg.name,
@@ -132,9 +127,9 @@ module.exports = function (grunt) {
                 buildDir: './appbuilds/releases',
                 cacheDir: './appbuilds/cache',
                 platforms: ['win', 'osx', 'linux32', 'linux64'],
-                macIcns: "./build/static/images/logo/512.icns",
+                macIcns: "./build/static/images/logo/1024.icns",
                 macCredits: "./src/credits.html",
-                winIco: "./build/static/images/logo/512.ico",
+                winIco: "./build/static/images/logo/128.ico",
                 version: NW_VERSION,
                 zip: false
             },
@@ -153,11 +148,11 @@ module.exports = function (grunt) {
 
     // Build
     grunt.registerTask('build', [
+        'clean:build',
         'bower-install-simple',
         'hr:app',
         'image_resize:logo128',
         'image_resize:logo32',
-        'image_resize:logoIcns',
         'image_resize:logoIco'
     ]);
 
@@ -174,6 +169,7 @@ module.exports = function (grunt) {
 
     // Build apps
     grunt.registerTask('build-apps', [
+        'clean:releases',
         'build',
         'nodewebkit',
     ]);
