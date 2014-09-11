@@ -6,6 +6,7 @@ require([
     "hr/args",
     "backends/auth",
     "backends/api",
+    "utils/dialogs",
     "views/grid",
     "views/repositories",
     "views/issues",
@@ -13,7 +14,8 @@ require([
     "views/tab",
     "text!resources/templates/main.html",
     "utils/date"
-], function(_, $, Q, hr, args, auth, api, GridView, RepositoriesView, IssuesView, IssueView, TabView, templateMain) {
+], function(_, $, Q, hr, args, auth, api, dialogs,
+GridView, RepositoriesView, IssuesView, IssueView, TabView, templateMain) {
     // Configure hr
     hr.configure(args);
 
@@ -77,10 +79,33 @@ require([
                 actions: [
                     {
                         position: "right",
+                        title: "Filter Issues",
+                        icon: "settings",
+                        click: function() {
+
+                        }
+                    },
+                    {
+                        position: "right",
                         title: "New Issue",
                         icon: "plus",
                         click: function() {
-
+                            dialogs.schema({
+                                title: "New Issue",
+                                properties: {
+                                    title: {
+                                        description: "Title",
+                                        type: "string"
+                                    },
+                                    body: {
+                                        description: "Message",
+                                        type: "string"
+                                    }
+                                }
+                            })
+                            .then(function(issue) {
+                                console.log(issue);
+                            });
                         }
                     }
                 ]

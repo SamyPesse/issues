@@ -1,0 +1,9 @@
+<% if (options.isHtml) { %>
+    <p><%- options.text %></p>
+<% } else { %>
+    <%= options.text %>
+<% } %>
+
+<div class="actions">
+    <button class="button do-confirm">OK</button>
+</div>
