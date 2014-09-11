@@ -48,7 +48,8 @@ define([
             IssuesView.__super__.initialize.apply(this, arguments);
 
             this.issuesFilter = {
-                labels: ""
+                labels: "",
+                state: "open"
             };
         },
 
@@ -82,6 +83,15 @@ define([
                     labels: {
                         description: "Labels",
                         type: "string"
+                    },
+                    state: {
+                        description: "State",
+                        type: "string",
+                        'enum': {
+                            'open': "Open",
+                            'close': "Close",
+                            'all': "All"
+                        }
                     }
                 }
             }, this.issuesFilter, { ok: "Filter" })

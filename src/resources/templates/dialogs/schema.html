@@ -8,7 +8,16 @@
     _.each(options.schema.properties, function(property, key) {
         var value = options.defaultValues[key] || property.default;
     %>
-        <% if (property.type == "string" && !property.textarea) { %>
+        <% if (property.type == "string" && property.enum) { %>
+        <div class="form-control">
+            <label><%- property.description %></label>
+            <select name="<%- key %>">
+            <% _.each(property.enum, function(key, _value) { %>
+                <option value="<%- _value %>" <% if (value == _value) { %>selected<% } %>><%- key %></option>
+            <% }); %>
+            </select>
+        </div>
+        <% } else if (property.type == "string" && !property.textarea) { %>
         <div class="form-control">
             <label><%- property.description %></label>
             <input type="<%- (property.password? "password" : "text") %>" name="<%- key %>" value="<%- value %>" />
