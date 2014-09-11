@@ -5,12 +5,18 @@ var pkg = require("./package.json");
 module.exports = function (grunt) {
     // Path to the client src
     var srcPath = path.resolve(__dirname, "src");
+    var NW_VERSION = "0.10.3";
 
     // Load grunt modules
+    grunt.loadNpmTasks('grunt-exec');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-hr-builder');
     grunt.loadNpmTasks("grunt-bower-install-simple");
     grunt.loadNpmTasks('grunt-http-server');
     grunt.loadNpmTasks('grunt-gh-pages');
+    grunt.loadNpmTasks('grunt-image-resize');
+    grunt.loadNpmTasks('grunt-node-webkit-builder');
 
     // Init GRUNT configuraton
     grunt.initConfig({
@@ -27,6 +33,44 @@ module.exports = function (grunt) {
                 base: './build'
             },
             src: ['**']
+        },
+        "image_resize": {
+            logo128: {
+                options: {
+                    height: 128,
+                    width: 128
+                },
+                files: {
+                    'build/static/images/logo/128.png': 'src/resources/images/logo/1024.png',
+                },
+            },
+            logo32: {
+                options: {
+                    height: 32,
+                    width: 32
+                },
+                files: {
+                    'build/static/images/logo/32.png': 'src/resources/images/logo/1024.png',
+                },
+            },
+            logoIcns: {
+                options: {
+                    height:512,
+                    width: 512
+                },
+                files: {
+                    'build/static/images/logo/512.icns': 'src/resources/images/logo/1024.png',
+                },
+            },
+            logoIco: {
+                options: {
+                    height:128,
+                    width: 128
+                },
+                files: {
+                    'build/static/images/logo/128.ico': 'src/resources/images/logo/1024.png',
+                },
+            }
         },
         "hr": {
             app: {
@@ -80,17 +124,41 @@ module.exports = function (grunt) {
                 defaultExt: "html",
                 runInBackground: false
             }
-        }
+        },
+        'nodewebkit': {
+            options: {
+                appName: pkg.name,
+                appVersion: pkg.version,
+                buildDir: './appbuilds/releases',
+                cacheDir: './appbuilds/cache',
+                platforms: ['win', 'osx', 'linux32', 'linux64'],
+                macIcns: "./build/static/images/logo/512.icns",
+                macCredits: "./src/credits.html",
+                winIco: "./build/static/images/logo/512.ico",
+                version: NW_VERSION,
+                zip: false
+            },
+            src: [
+                "./**/*",
+                "!./src/**",
+                "./src/dirname.js",
+                "!./appbuilds/**",
+                "!./node_modules/hr.js/**",
+                "!./node_modules/grunt-*/**",
+                "!./node_modules/grunt/**",
+                "!./node_modules/nw-gyp/**"
+            ]
+        },
     });
-
-    // Prepare build
-    grunt.registerTask('prepare', [
-        'bower-install-simple'
-    ]);
 
     // Build
     grunt.registerTask('build', [
-        'hr:app'
+        'bower-install-simple',
+        'hr:app',
+        'image_resize:logo128',
+        'image_resize:logo32',
+        'image_resize:logoIcns',
+        'image_resize:logoIco'
     ]);
 
     // Test
@@ -104,8 +172,13 @@ module.exports = function (grunt) {
         'gh-pages'
     ]);
 
+    // Build apps
+    grunt.registerTask('build-apps', [
+        'build',
+        'nodewebkit',
+    ]);
+
     grunt.registerTask('default', [
-        'prepare',
         'build',
         'test'
     ]);
