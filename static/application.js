@@ -23972,7 +23972,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1410442611887,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1410443590783,"baseUrl":"/"}; });
 define('backends/auth',[
     "hr/hr",
     "hr/promise"
@@ -25634,6 +25634,11 @@ define('collections/issues',[
         // Load list of issues for a repo
         loadForRepo: function(repo, filter) {
             return api.execute("get:repos/"+repo+"/issues", filter).then(this.reset.bind(this));
+        },
+
+        // Create a new issue
+        createIssue: function(repo, issue) {
+            return api.execute("post:repos/"+repo+"/issues", issue);
         }
     });
 
@@ -25706,10 +25711,10 @@ define('views/issues',[
 
         // Load issues with a specific filter
         loadIssues: function(repo, filter) {
+            repo = repo || hr.app.currentRepo;
             if (filter) {
                 this.issuesFilter = filter;
             }
-
 
             filter = {
                 labels: this.issuesFilter.labels,
@@ -25743,6 +25748,8 @@ define('views/issues',[
 
         // Create new issue
         onCreateNewIssue: function() {
+            var that = this;
+
             return dialogs.schema({
                 title: "New Issue",
                 properties: {
@@ -25754,11 +25761,19 @@ define('views/issues',[
                         description: "Message",
                         type: "string",
                         textarea: true
+                    },
+                    labels: {
+                        description: "Labels",
+                        type: "string"
                     }
                 }
             }, {}, { ok: "Submit new issue" })
             .then(function(issue) {
-                console.log(issue);
+                return that.collection.createIssue(hr.app.currentRepo, issue)
+                .then(function() {
+                    return that.loadIssues();
+                })
+                .fail(dialogs.error);
             });
         }
     });
