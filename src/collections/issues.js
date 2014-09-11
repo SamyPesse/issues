@@ -13,6 +13,11 @@ define([
         // Load list of issues for a repo
         loadForRepo: function(repo, filter) {
             return api.execute("get:repos/"+repo+"/issues", filter).then(this.reset.bind(this));
+        },
+
+        // Create a new issue
+        createIssue: function(repo, issue) {
+            return api.execute("post:repos/"+repo+"/issues", issue);
         }
     });
 

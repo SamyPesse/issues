@@ -63,10 +63,10 @@ define([
 
         // Load issues with a specific filter
         loadIssues: function(repo, filter) {
+            repo = repo || hr.app.currentRepo;
             if (filter) {
                 this.issuesFilter = filter;
             }
-
 
             filter = {
                 labels: this.issuesFilter.labels,
@@ -100,6 +100,8 @@ define([
 
         // Create new issue
         onCreateNewIssue: function() {
+            var that = this;
+
             return dialogs.schema({
                 title: "New Issue",
                 properties: {
@@ -111,11 +113,19 @@ define([
                         description: "Message",
                         type: "string",
                         textarea: true
+                    },
+                    labels: {
+                        description: "Labels",
+                        type: "string"
                     }
                 }
             }, {}, { ok: "Submit new issue" })
             .then(function(issue) {
-                console.log(issue);
+                return that.collection.createIssue(hr.app.currentRepo, issue)
+                .then(function() {
+                    return that.loadIssues();
+                })
+                .fail(dialogs.error);
             });
         }
     });
