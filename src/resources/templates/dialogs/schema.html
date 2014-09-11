@@ -1,23 +1,33 @@
-<p><%- options.schema.title %></p>
+<div class="dialog-header">
+    <h2><%- options.schema.title %></h2>
+</div>
 
-<%
-_.each(options.schema.properties, function(property, key) {
-    var value = options.defaultValues[key] || property.default;
-%>
-    <% if (property.type == "string") { %>
-    <div class="form-group">
-        <label><%- property.description %></label>
-        <input type="<%- (property.password? "password" : "text") %>" class="form-control" name="<%- key %>" value="<%- value %>" />
+<div class="dialog-content">
+    <div class="form">
+    <%
+    _.each(options.schema.properties, function(property, key) {
+        var value = options.defaultValues[key] || property.default;
+    %>
+        <% if (property.type == "string" && !property.textarea) { %>
+        <div class="form-control">
+            <label><%- property.description %></label>
+            <input type="<%- (property.password? "password" : "text") %>" name="<%- key %>" value="<%- value %>" />
+        </div>
+        <% } else if (property.type == "string" && property.textarea) { %>
+        <div class="form-control">
+            <label><%- property.description %></label>
+            <textarea name="<%- key %>"><%- value %></textarea>
+        </div>
+        <% } else if (property.type == "integer") { %>
+        <div class="form-control">
+            <label><%- property.description %></label>
+            <input type="number" name="<%- key %>" value="<%- value %>" step="<%- property.multipleOf || 1 %>" min="<%- property.minimum || 0 %>" max="<%- property.maximum || 10000 %>" />
+        </div>
+        <% } %>
+    <% }); %>
     </div>
-    <% } else if (property.type == "integer") { %>
-    <div class="form-group">
-        <label><%- property.description %></label>
-        <input type="number" class="form-control" name="<%- key %>" value="<%- value %>" step="<%- property.multipleOf || 1 %>" min="<%- property.minimum || 0 %>" max="<%- property.maximum || 10000 %>" />
-    </div>
-    <% } %>
-<% }); %>
-
-<div class="actions">
-    <button class="button do-confirm"><%- options.ok || "Ok" %></button>
-    <button class="button do-close"><%- options.cancel || "Cancel" %></button>
+</div>
+<div class="dialog-footer">
+    <button class="button button-success do-confirm"><%- options.ok || "Ok" %></button>
+    <button class="button button-default do-close"><%- options.cancel || "Cancel" %></button>
 </div>

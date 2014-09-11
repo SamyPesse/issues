@@ -1,3 +1,13 @@
+.dialog-container {
+    position: absolute;
+    z-index: 1000;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background: rgba(0, 0, 0, 0.5);
+}
+
 .dialog {
     position: absolute;
     z-index: 1000;
@@ -10,6 +20,9 @@
 
     background: @dialog-background;
     border: 1px solid @dialog-border-color;
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 5px;
+    box-shadow: 0 0 18px rgba(0,0,0,0.4);
 
     &.size-large {
         width: @dialog-size-large;
@@ -21,7 +34,23 @@
         margin-left: -@dialog-size-small/2;
     }
 
-    .dialog-input {
-        padding: 5px;
+    .dialog-header {
+        margin: 0px;
+        padding: @dialog-padding-v @dialog-padding-h;
+        border-bottom: 1px solid #ddd;
+
+        h2 {
+            margin: 0px;
+            padding: 0px;
+            font-size: 18px;
+        }
+    }
+
+    .dialog-content {
+        padding: @dialog-padding-v @dialog-padding-h;
+    }
+
+    .dialog-footer {
+        padding: @dialog-padding-v @dialog-padding-h;
     }
 }

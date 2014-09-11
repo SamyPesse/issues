@@ -99,10 +99,11 @@ GridView, RepositoriesView, IssuesView, IssueView, TabView, templateMain) {
                                     },
                                     body: {
                                         description: "Message",
-                                        type: "string"
+                                        type: "string",
+                                        textarea: true
                                     }
                                 }
-                            })
+                            }, {}, { ok: "Submit new issue" })
                             .then(function(issue) {
                                 console.log(issue);
                             });

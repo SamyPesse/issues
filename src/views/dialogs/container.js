@@ -4,7 +4,7 @@ define([
     "hr/hr"
 ], function(_, $, hr) {
     var DialogView = hr.View.extend({
-        className: "dialog",
+        className: "dialog-container",
         defaults: {
             keyboard: true,
             keyboardEnter: true,
@@ -14,6 +14,8 @@ define([
             size: "medium"
         },
         events: {
+            "click": "close",
+            "click .dialog": "stopPropagation",
             "keydown": "keydown"
         },
 
@@ -24,8 +26,11 @@ define([
             this.keydownHandler = _.bind(this.keydown, this)
             if (this.options.keyboard) $(document).bind("keydown", this.keydownHandler);
 
+            this.$dialog = $("<div>", {'class': "dialog"});
+            this.$dialog.appendTo(this.$el);
+
             // Adapt style
-            this.$el.addClass("size-"+this.options.size);
+            this.$dialog.addClass("size-"+this.options.size);
 
             // Build view
             this.view = new options.View(this.options.view, this);
@@ -33,7 +38,7 @@ define([
 
         render: function() {
             this.view.render();
-            this.view.appendTo(this);
+            this.view.appendTo(this.$dialog);
 
             return this.ready();
         },
@@ -80,6 +85,10 @@ define([
             if (key == 27) {
                 this.close(e, true);
             }
+        },
+
+        stopPropagation: function(e) {
+            e.stopPropagation();
         }
     }, {
         current: null,

@@ -82,10 +82,10 @@ alertTemplate, confirmTemplate, promptTemplate, schemaTemplate) {
     };
 
     // Schema
-    var openSchema = function(schema, values) {
+    var openSchema = function(schema, values, options) {
         values = values || {};
 
-        return openInput({
+        return openInput(_.defaults(options || {}, {
             template: schemaTemplate,
             schema: schema,
             defaultValues: values,
@@ -99,7 +99,7 @@ alertTemplate, confirmTemplate, promptTemplate, schemaTemplate) {
 
                 return nvalues;
             }
-        });
+        }));
     };
 
     return {
