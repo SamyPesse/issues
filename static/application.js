@@ -23972,7 +23972,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1410302402252,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1410442611887,"baseUrl":"/"}; });
 define('backends/auth',[
     "hr/hr",
     "hr/promise"
@@ -24001,6 +24001,11 @@ define('backends/auth',[
         hr.Storage.set("password", password);
     };
 
+    // Clear auth settings
+    var clear = function() {
+        set(null, null);
+    };
+
     // Initialize the auth backend
     var init = function() {
         username = hr.Storage.get("username");
@@ -24013,6 +24018,7 @@ define('backends/auth',[
         init: init,
         get: get,
         set: set,
+        clear: clear,
         isAuth: isAuth
     };
 });
@@ -24310,7 +24316,7 @@ define('backends/api',[
             if (options.auth) authInfos = options.auth;
             if (authInfos) options.headers['Authorization'] = 'Basic ' + hash.btoa(authInfos.username + ':' + authInfos.password)
 
-            return hr.Requests[httpMethod](API_URL+"/"+method, args? JSON.stringify(args) : null, {
+            return hr.Requests[httpMethod](API_URL+"/"+method, httpMethod == "get"? args : JSON.stringify(args || {}), {
                 dataType: options.dataType,
                 options: {
                     headers: options.headers
@@ -24320,6 +24326,567 @@ define('backends/api',[
     });
 
     return api;
+});
+define('views/dialogs/container',[
+    "hr/utils",
+    "hr/dom",
+    "hr/hr"
+], function(_, $, hr) {
+    var DialogView = hr.View.extend({
+        className: "dialog-container",
+        defaults: {
+            keyboard: true,
+            keyboardEnter: true,
+
+            View: hr.View,
+            view: {},
+            size: "medium"
+        },
+        events: {
+            "click": "close",
+            "click .dialog": "stopPropagation",
+            "keydown": "keydown"
+        },
+
+        initialize: function(options) {
+            DialogView.__super__.initialize.apply(this, arguments);
+
+            // Bind keyboard
+            this.keydownHandler = _.bind(this.keydown, this)
+            if (this.options.keyboard) $(document).bind("keydown", this.keydownHandler);
+
+            this.$dialog = $("<div>", {'class': "dialog"});
+            this.$dialog.appendTo(this.$el);
+
+            // Adapt style
+            this.$dialog.addClass("size-"+this.options.size);
+
+            // Build view
+            this.view = new options.View(this.options.view, this);
+        },
+
+        render: function() {
+            this.view.render();
+            this.view.appendTo(this.$dialog);
+
+            return this.ready();
+        },
+
+        finish: function() {
+            this.open();
+            return DialogView.__super__.finish.apply(this, arguments);
+        },
+
+        open: function() {
+            if (DialogView.current != null) DialogView.current.close();
+
+            this.$el.appendTo($("body"));
+            DialogView.current = this;
+
+            this.trigger("open");
+
+            return this;
+        },
+
+        close: function(e, force) {
+            if (e) e.preventDefault();
+
+            // Unbind document keydown
+            $(document).unbind("keydown", this.keydownHandler);
+
+            // Hide modal
+            this.trigger("close", force);
+            this.remove();
+
+            DialogView.current = null;
+        },
+
+        keydown: function(e) {
+            if (!this.options.keyboard) return;
+
+            var key = e.keyCode || e.which;
+
+            // Enter: valid
+            if (key == 13 && this.options.keyboardEnter) {
+                this.close(e);
+            } else
+            // Esc: close
+            if (key == 27) {
+                this.close(e, true);
+            }
+        },
+
+        stopPropagation: function(e) {
+            e.stopPropagation();
+        }
+    }, {
+        current: null,
+    });
+
+    return DialogView;
+});
+define('views/dialogs/input',[
+    "hr/utils",
+    "hr/dom",
+    "hr/hr"
+], function(_, $, hr) {
+    var DialogInputView = hr.View.extend({
+        className: "dialog-input",
+        defaults: {
+            className: "",
+            template: "",
+            value: true
+        },
+        events: {
+            "click .do-close": "onClose",
+            "click .do-confirm": "onConfirm"
+        },
+
+        initialize: function(options) {
+            DialogInputView.__super__.initialize.apply(this, arguments);
+
+            // Adapt style
+            this.$el.addClass(this.options.className);
+
+            // Value
+            this.value = this.options.value;
+        },
+
+        finish: function() {
+            this.$("input").first().select();
+            return DialogInputView.__super__.finish.apply(this, arguments);
+        },
+
+        template: function() {
+            return this.options.template;
+        },
+        templateContext: function() {
+            return {
+                options: this.options
+            };
+        },
+
+        getValue: function() {
+            var selector = this.options.value;
+            if (_.isFunction(selector)) {
+                this.value = selector(this);
+            } else if (_.isString(selector)) {
+                this.value = this[selector]();
+            }
+
+            return this.value;
+        },
+
+        onConfirm: function(e) {
+            if (e) e.preventDefault();
+
+            this.parent.close(e);
+        },
+        onClose: function(e) {
+            if (e) e.preventDefault();
+            this.parent.close(null, true);
+        }
+    });
+
+    return DialogInputView;
+});
+/**
+ * @license RequireJS text 1.0.0 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
+ * see: http://github.com/jrburke/requirejs for details
+ */
+/*jslint regexp: false, nomen: false, plusplus: false, strict: false */
+/*global require: false, XMLHttpRequest: false, ActiveXObject: false,
+  define: false, window: false, process: false, Packages: false,
+  java: false, location: false */
+
+(function () {
+    var progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
+        xmlRegExp = /^\s*<\?xml(\s)+version=[\'\"](\d)*.(\d)*[\'\"](\s)*\?>/im,
+        bodyRegExp = /<body[^>]*>\s*([\s\S]+)\s*<\/body>/im,
+        hasLocation = typeof location !== 'undefined' && location.href,
+        defaultProtocol = hasLocation && location.protocol && location.protocol.replace(/\:/, ''),
+        defaultHostName = hasLocation && location.hostname,
+        defaultPort = hasLocation && (location.port || undefined),
+        buildMap = [];
+
+    define('text',[],function () {
+        var text, get, fs;
+
+        if (typeof window !== "undefined" && window.navigator && window.document) {
+            get = function (url, callback) {
+                var xhr = text.createXhr();
+                xhr.open('GET', url, true);
+                xhr.onreadystatechange = function (evt) {
+                    //Do not explicitly handle errors, those should be
+                    //visible via console output in the browser.
+                    if (xhr.readyState === 4) {
+                        callback(xhr.responseText);
+                    }
+                };
+                xhr.send(null);
+            };
+        } else if (typeof process !== "undefined" &&
+                 process.versions &&
+                 !!process.versions.node) {
+            //Using special require.nodeRequire, something added by r.js.
+            fs = require.nodeRequire('fs');
+
+            get = function (url, callback) {
+                callback(fs.readFileSync(url, 'utf8'));
+            };
+        } else if (typeof Packages !== 'undefined') {
+            //Why Java, why is this so awkward?
+            get = function (url, callback) {
+                var encoding = "utf-8",
+                    file = new java.io.File(url),
+                    lineSeparator = java.lang.System.getProperty("line.separator"),
+                    input = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file), encoding)),
+                    stringBuffer, line,
+                    content = '';
+                try {
+                    stringBuffer = new java.lang.StringBuffer();
+                    line = input.readLine();
+
+                    // Byte Order Mark (BOM) - The Unicode Standard, version 3.0, page 324
+                    // http://www.unicode.org/faq/utf_bom.html
+
+                    // Note that when we use utf-8, the BOM should appear as "EF BB BF", but it doesn't due to this bug in the JDK:
+                    // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4508058
+                    if (line && line.length() && line.charAt(0) === 0xfeff) {
+                        // Eat the BOM, since we've already found the encoding on this file,
+                        // and we plan to concatenating this buffer with others; the BOM should
+                        // only appear at the top of a file.
+                        line = line.substring(1);
+                    }
+
+                    stringBuffer.append(line);
+
+                    while ((line = input.readLine()) !== null) {
+                        stringBuffer.append(lineSeparator);
+                        stringBuffer.append(line);
+                    }
+                    //Make sure we return a JavaScript string and not a Java string.
+                    content = String(stringBuffer.toString()); //String
+                } finally {
+                    input.close();
+                }
+                callback(content);
+            };
+        }
+
+        text = {
+            version: '1.0.0',
+
+            strip: function (content) {
+                //Strips <?xml ...?> declarations so that external SVG and XML
+                //documents can be added to a document without worry. Also, if the string
+                //is an HTML document, only the part inside the body tag is returned.
+                if (content) {
+                    content = content.replace(xmlRegExp, "");
+                    var matches = content.match(bodyRegExp);
+                    if (matches) {
+                        content = matches[1];
+                    }
+                } else {
+                    content = "";
+                }
+                return content;
+            },
+
+            jsEscape: function (content) {
+                return content.replace(/(['\\])/g, '\\$1')
+                    .replace(/[\f]/g, "\\f")
+                    .replace(/[\b]/g, "\\b")
+                    .replace(/[\n]/g, "\\n")
+                    .replace(/[\t]/g, "\\t")
+                    .replace(/[\r]/g, "\\r");
+            },
+
+            createXhr: function () {
+                //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
+                var xhr, i, progId;
+                if (typeof XMLHttpRequest !== "undefined") {
+                    return new XMLHttpRequest();
+                } else {
+                    for (i = 0; i < 3; i++) {
+                        progId = progIds[i];
+                        try {
+                            xhr = new ActiveXObject(progId);
+                        } catch (e) {}
+
+                        if (xhr) {
+                            progIds = [progId];  // so faster next time
+                            break;
+                        }
+                    }
+                }
+
+                if (!xhr) {
+                    throw new Error("createXhr(): XMLHttpRequest not available");
+                }
+
+                return xhr;
+            },
+
+            get: get,
+
+            /**
+             * Parses a resource name into its component parts. Resource names
+             * look like: module/name.ext!strip, where the !strip part is
+             * optional.
+             * @param {String} name the resource name
+             * @returns {Object} with properties "moduleName", "ext" and "strip"
+             * where strip is a boolean.
+             */
+            parseName: function (name) {
+                var strip = false, index = name.indexOf("."),
+                    modName = name.substring(0, index),
+                    ext = name.substring(index + 1, name.length);
+
+                index = ext.indexOf("!");
+                if (index !== -1) {
+                    //Pull off the strip arg.
+                    strip = ext.substring(index + 1, ext.length);
+                    strip = strip === "strip";
+                    ext = ext.substring(0, index);
+                }
+
+                return {
+                    moduleName: modName,
+                    ext: ext,
+                    strip: strip
+                };
+            },
+
+            xdRegExp: /^((\w+)\:)?\/\/([^\/\\]+)/,
+
+            /**
+             * Is an URL on another domain. Only works for browser use, returns
+             * false in non-browser environments. Only used to know if an
+             * optimized .js version of a text resource should be loaded
+             * instead.
+             * @param {String} url
+             * @returns Boolean
+             */
+            useXhr: function (url, protocol, hostname, port) {
+                var match = text.xdRegExp.exec(url),
+                    uProtocol, uHostName, uPort;
+                if (!match) {
+                    return true;
+                }
+                uProtocol = match[2];
+                uHostName = match[3];
+
+                uHostName = uHostName.split(':');
+                uPort = uHostName[1];
+                uHostName = uHostName[0];
+
+                return (!uProtocol || uProtocol === protocol) &&
+                       (!uHostName || uHostName === hostname) &&
+                       ((!uPort && !uHostName) || uPort === port);
+            },
+
+            finishLoad: function (name, strip, content, onLoad, config) {
+                content = strip ? text.strip(content) : content;
+                if (config.isBuild && config.inlineText) {
+                    buildMap[name] = content;
+                }
+                onLoad(content);
+            },
+
+            load: function (name, req, onLoad, config) {
+                //Name has format: some.module.filext!strip
+                //The strip part is optional.
+                //if strip is present, then that means only get the string contents
+                //inside a body tag in an HTML string. For XML/SVG content it means
+                //removing the <?xml ...?> declarations so the content can be inserted
+                //into the current doc without problems.
+
+                var parsed = text.parseName(name),
+                    nonStripName = parsed.moduleName + '.' + parsed.ext,
+                    url = req.toUrl(nonStripName),
+                    useXhr = (config && config.text && config.text.useXhr) ||
+                             text.useXhr;
+
+                //Load the text. Use XHR if possible and in a browser.
+                if (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort)) {
+                    text.get(url, function (content) {
+                        text.finishLoad(name, parsed.strip, content, onLoad, config);
+                    });
+                } else {
+                    //Need to fetch the resource across domains. Assume
+                    //the resource has been optimized into a JS module. Fetch
+                    //by the module name + extension, but do not include the
+                    //!strip part to avoid file system issues.
+                    req([nonStripName], function (content) {
+                        text.finishLoad(parsed.moduleName + '.' + parsed.ext,
+                                        parsed.strip, content, onLoad, config);
+                    });
+                }
+            },
+
+            write: function (pluginName, moduleName, write, config) {
+                if (moduleName in buildMap) {
+                    var content = text.jsEscape(buildMap[moduleName]);
+                    write.asModule(pluginName + "!" + moduleName,
+                                   "define(function () { return '" +
+                                       content +
+                                   "';});\n");
+                }
+            },
+
+            writeFile: function (pluginName, moduleName, req, write, config) {
+                var parsed = text.parseName(moduleName),
+                    nonStripName = parsed.moduleName + '.' + parsed.ext,
+                    //Use a '.js' file name so that it indicates it is a
+                    //script that can be loaded across domains.
+                    fileName = req.toUrl(parsed.moduleName + '.' +
+                                         parsed.ext) + '.js';
+
+                //Leverage own load() method to load plugin value, but only
+                //write out values that do not have the strip argument,
+                //to avoid any potential issues with ! in file names.
+                text.load(nonStripName, req, function (value) {
+                    //Use own write() method to construct full module value.
+                    //But need to create shell that translates writeFile's
+                    //write() to the right interface.
+                    var textWrite = function (contents) {
+                        return write(fileName, contents);
+                    };
+                    textWrite.asModule = function (moduleName, contents) {
+                        return write.asModule(moduleName, fileName, contents);
+                    };
+
+                    text.write(pluginName, nonStripName, textWrite, config);
+                }, config);
+            }
+        };
+
+        return text;
+    });
+}());
+
+define('text!resources/templates/dialogs/alert.html',[],function () { return '<% if (options.isHtml) { %>\n    <p><%- options.text %></p>\n<% } else { %>\n    <%= options.text %>\n<% } %>\n\n<div class="actions">\n    <button class="button button-default do-confirm">OK</button>\n</div>';});
+
+define('text!resources/templates/dialogs/confirm.html',[],function () { return '<p><%- options.text %></p>\n\n<div class="actions">\n    <button class="button do-confirm">OK</button>\n    <button class="button do-close">Cancel</button>\n</div>';});
+
+define('text!resources/templates/dialogs/prompt.html',[],function () { return '<div class="form-group">\n    <label><%- options.text %></label>\n    <input type="text" class="form-control" value="<%- options.defaultValue %>" />\n</div>\n\n<div class="actions">\n    <button class="button button-success do-confirm">OK</button>\n    <button class="button button-default do-close">Cancel</button>\n</div>';});
+
+define('text!resources/templates/dialogs/schema.html',[],function () { return '<div class="dialog-header">\n    <h2><%- options.schema.title %></h2>\n</div>\n\n<div class="dialog-content">\n    <div class="form">\n    <%\n    _.each(options.schema.properties, function(property, key) {\n        var value = options.defaultValues[key] || property.default;\n    %>\n        <% if (property.type == "string" && property.enum) { %>\n        <div class="form-control">\n            <label><%- property.description %></label>\n            <select name="<%- key %>">\n            <% _.each(property.enum, function(key, _value) { %>\n                <option value="<%- _value %>" <% if (value == _value) { %>selected<% } %>><%- key %></option>\n            <% }); %>\n            </select>\n        </div>\n        <% } else if (property.type == "string" && !property.textarea) { %>\n        <div class="form-control">\n            <label><%- property.description %></label>\n            <input type="<%- (property.password? "password" : "text") %>" name="<%- key %>" value="<%- value %>" />\n        </div>\n        <% } else if (property.type == "string" && property.textarea) { %>\n        <div class="form-control">\n            <label><%- property.description %></label>\n            <textarea name="<%- key %>"><%- value %></textarea>\n        </div>\n        <% } else if (property.type == "integer") { %>\n        <div class="form-control">\n            <label><%- property.description %></label>\n            <input type="number" name="<%- key %>" value="<%- value %>" step="<%- property.multipleOf || 1 %>" min="<%- property.minimum || 0 %>" max="<%- property.maximum || 10000 %>" />\n        </div>\n        <% } %>\n    <% }); %>\n    </div>\n</div>\n<div class="dialog-footer">\n    <button class="button button-success do-confirm"><%- options.ok || "Ok" %></button>\n    <button class="button button-default do-close"><%- options.cancel || "Cancel" %></button>\n</div>';});
+
+define('utils/dialogs',[
+    "hr/utils",
+    "hr/promise",
+    "hr/hr",
+    "views/dialogs/container",
+    "views/dialogs/input",
+    "text!resources/templates/dialogs/alert.html",
+    "text!resources/templates/dialogs/confirm.html",
+    "text!resources/templates/dialogs/prompt.html",
+    "text!resources/templates/dialogs/schema.html"
+], function(_, Q, hr, Dialog, DialogInputView,
+alertTemplate, confirmTemplate, promptTemplate, schemaTemplate) {
+
+    // Open a dialog
+    var open = function(View, options) {
+        var d = Q.defer();
+
+        // Create the dialog
+        var diag = new Dialog(_.extend(options || {}, {
+            View: View
+        }));
+
+        // Bind close
+        diag.on("close", function(force) {
+            if (force) return d.reject(new Error("Dialog was been closed"));
+            d.resolve(diag.view);
+        });
+
+        // Open it (add it to dom)
+        diag.render();
+
+        return d.promise;
+    };
+
+    // Input dialog
+    var openInput = function(viewOptions, options, View) {
+        return open(View || DialogInputView, _.extend(options || {}, {
+            view: viewOptions || {}
+        }))
+        .then(function(view) {
+            var value = view.getValue();
+
+            if (value == null) return Q.reject(new Error("Dialog return empty value"));
+            return value;
+        });
+    };
+
+    // Alert
+    var openAlert = function(text, options) {
+        options = _.defaults(options || {}, {
+            isHtml: false
+        });
+        return openInput({
+            template: alertTemplate,
+            text: text,
+            isHtml: options.isHtml
+        });
+    };
+    var openErrorAlert = function(err) {
+        return openAlert("Error: "+(err.message || err))
+        .fin(function() {
+            return Q.reject(err);
+        });
+    };
+
+    // Confirm
+    var openConfirm = function(text, options) {
+        return openInput({
+            template: confirmTemplate,
+            text: text
+        });
+    };
+
+    // Prompt
+    var openPrompt = function(text, value, options) {
+        return openInput({
+            template: promptTemplate,
+            text: text,
+            defaultValue: value,
+            value: function(d) { return d.$("input").val(); }
+        });
+    };
+
+    // Schema
+    var openSchema = function(schema, values, options) {
+        values = values || {};
+
+        return openInput(_.defaults(options || {}, {
+            template: schemaTemplate,
+            schema: schema,
+            defaultValues: values,
+            value: function(d) {
+                var nvalues = _.clone(values);
+
+                _.each(schema.properties, function(property, key) {
+                    var v = d.$("*[name='"+key+"']").val();
+                    nvalues[key] = v;
+                });
+
+                return nvalues;
+            }
+        }));
+    };
+
+    return {
+        open: open,
+        alert: openAlert,
+        error: openErrorAlert,
+        confirm: openConfirm,
+        prompt: openPrompt,
+        schema: openSchema
+    };
 });
 define('utils/dragdrop',[
     'hr/utils',
@@ -24940,283 +25507,6 @@ define('collections/repositories',[
 
     return Repositories;
 });
-/**
- * @license RequireJS text 1.0.0 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.
- * Available via the MIT or new BSD license.
- * see: http://github.com/jrburke/requirejs for details
- */
-/*jslint regexp: false, nomen: false, plusplus: false, strict: false */
-/*global require: false, XMLHttpRequest: false, ActiveXObject: false,
-  define: false, window: false, process: false, Packages: false,
-  java: false, location: false */
-
-(function () {
-    var progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
-        xmlRegExp = /^\s*<\?xml(\s)+version=[\'\"](\d)*.(\d)*[\'\"](\s)*\?>/im,
-        bodyRegExp = /<body[^>]*>\s*([\s\S]+)\s*<\/body>/im,
-        hasLocation = typeof location !== 'undefined' && location.href,
-        defaultProtocol = hasLocation && location.protocol && location.protocol.replace(/\:/, ''),
-        defaultHostName = hasLocation && location.hostname,
-        defaultPort = hasLocation && (location.port || undefined),
-        buildMap = [];
-
-    define('text',[],function () {
-        var text, get, fs;
-
-        if (typeof window !== "undefined" && window.navigator && window.document) {
-            get = function (url, callback) {
-                var xhr = text.createXhr();
-                xhr.open('GET', url, true);
-                xhr.onreadystatechange = function (evt) {
-                    //Do not explicitly handle errors, those should be
-                    //visible via console output in the browser.
-                    if (xhr.readyState === 4) {
-                        callback(xhr.responseText);
-                    }
-                };
-                xhr.send(null);
-            };
-        } else if (typeof process !== "undefined" &&
-                 process.versions &&
-                 !!process.versions.node) {
-            //Using special require.nodeRequire, something added by r.js.
-            fs = require.nodeRequire('fs');
-
-            get = function (url, callback) {
-                callback(fs.readFileSync(url, 'utf8'));
-            };
-        } else if (typeof Packages !== 'undefined') {
-            //Why Java, why is this so awkward?
-            get = function (url, callback) {
-                var encoding = "utf-8",
-                    file = new java.io.File(url),
-                    lineSeparator = java.lang.System.getProperty("line.separator"),
-                    input = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file), encoding)),
-                    stringBuffer, line,
-                    content = '';
-                try {
-                    stringBuffer = new java.lang.StringBuffer();
-                    line = input.readLine();
-
-                    // Byte Order Mark (BOM) - The Unicode Standard, version 3.0, page 324
-                    // http://www.unicode.org/faq/utf_bom.html
-
-                    // Note that when we use utf-8, the BOM should appear as "EF BB BF", but it doesn't due to this bug in the JDK:
-                    // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4508058
-                    if (line && line.length() && line.charAt(0) === 0xfeff) {
-                        // Eat the BOM, since we've already found the encoding on this file,
-                        // and we plan to concatenating this buffer with others; the BOM should
-                        // only appear at the top of a file.
-                        line = line.substring(1);
-                    }
-
-                    stringBuffer.append(line);
-
-                    while ((line = input.readLine()) !== null) {
-                        stringBuffer.append(lineSeparator);
-                        stringBuffer.append(line);
-                    }
-                    //Make sure we return a JavaScript string and not a Java string.
-                    content = String(stringBuffer.toString()); //String
-                } finally {
-                    input.close();
-                }
-                callback(content);
-            };
-        }
-
-        text = {
-            version: '1.0.0',
-
-            strip: function (content) {
-                //Strips <?xml ...?> declarations so that external SVG and XML
-                //documents can be added to a document without worry. Also, if the string
-                //is an HTML document, only the part inside the body tag is returned.
-                if (content) {
-                    content = content.replace(xmlRegExp, "");
-                    var matches = content.match(bodyRegExp);
-                    if (matches) {
-                        content = matches[1];
-                    }
-                } else {
-                    content = "";
-                }
-                return content;
-            },
-
-            jsEscape: function (content) {
-                return content.replace(/(['\\])/g, '\\$1')
-                    .replace(/[\f]/g, "\\f")
-                    .replace(/[\b]/g, "\\b")
-                    .replace(/[\n]/g, "\\n")
-                    .replace(/[\t]/g, "\\t")
-                    .replace(/[\r]/g, "\\r");
-            },
-
-            createXhr: function () {
-                //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
-                var xhr, i, progId;
-                if (typeof XMLHttpRequest !== "undefined") {
-                    return new XMLHttpRequest();
-                } else {
-                    for (i = 0; i < 3; i++) {
-                        progId = progIds[i];
-                        try {
-                            xhr = new ActiveXObject(progId);
-                        } catch (e) {}
-
-                        if (xhr) {
-                            progIds = [progId];  // so faster next time
-                            break;
-                        }
-                    }
-                }
-
-                if (!xhr) {
-                    throw new Error("createXhr(): XMLHttpRequest not available");
-                }
-
-                return xhr;
-            },
-
-            get: get,
-
-            /**
-             * Parses a resource name into its component parts. Resource names
-             * look like: module/name.ext!strip, where the !strip part is
-             * optional.
-             * @param {String} name the resource name
-             * @returns {Object} with properties "moduleName", "ext" and "strip"
-             * where strip is a boolean.
-             */
-            parseName: function (name) {
-                var strip = false, index = name.indexOf("."),
-                    modName = name.substring(0, index),
-                    ext = name.substring(index + 1, name.length);
-
-                index = ext.indexOf("!");
-                if (index !== -1) {
-                    //Pull off the strip arg.
-                    strip = ext.substring(index + 1, ext.length);
-                    strip = strip === "strip";
-                    ext = ext.substring(0, index);
-                }
-
-                return {
-                    moduleName: modName,
-                    ext: ext,
-                    strip: strip
-                };
-            },
-
-            xdRegExp: /^((\w+)\:)?\/\/([^\/\\]+)/,
-
-            /**
-             * Is an URL on another domain. Only works for browser use, returns
-             * false in non-browser environments. Only used to know if an
-             * optimized .js version of a text resource should be loaded
-             * instead.
-             * @param {String} url
-             * @returns Boolean
-             */
-            useXhr: function (url, protocol, hostname, port) {
-                var match = text.xdRegExp.exec(url),
-                    uProtocol, uHostName, uPort;
-                if (!match) {
-                    return true;
-                }
-                uProtocol = match[2];
-                uHostName = match[3];
-
-                uHostName = uHostName.split(':');
-                uPort = uHostName[1];
-                uHostName = uHostName[0];
-
-                return (!uProtocol || uProtocol === protocol) &&
-                       (!uHostName || uHostName === hostname) &&
-                       ((!uPort && !uHostName) || uPort === port);
-            },
-
-            finishLoad: function (name, strip, content, onLoad, config) {
-                content = strip ? text.strip(content) : content;
-                if (config.isBuild && config.inlineText) {
-                    buildMap[name] = content;
-                }
-                onLoad(content);
-            },
-
-            load: function (name, req, onLoad, config) {
-                //Name has format: some.module.filext!strip
-                //The strip part is optional.
-                //if strip is present, then that means only get the string contents
-                //inside a body tag in an HTML string. For XML/SVG content it means
-                //removing the <?xml ...?> declarations so the content can be inserted
-                //into the current doc without problems.
-
-                var parsed = text.parseName(name),
-                    nonStripName = parsed.moduleName + '.' + parsed.ext,
-                    url = req.toUrl(nonStripName),
-                    useXhr = (config && config.text && config.text.useXhr) ||
-                             text.useXhr;
-
-                //Load the text. Use XHR if possible and in a browser.
-                if (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort)) {
-                    text.get(url, function (content) {
-                        text.finishLoad(name, parsed.strip, content, onLoad, config);
-                    });
-                } else {
-                    //Need to fetch the resource across domains. Assume
-                    //the resource has been optimized into a JS module. Fetch
-                    //by the module name + extension, but do not include the
-                    //!strip part to avoid file system issues.
-                    req([nonStripName], function (content) {
-                        text.finishLoad(parsed.moduleName + '.' + parsed.ext,
-                                        parsed.strip, content, onLoad, config);
-                    });
-                }
-            },
-
-            write: function (pluginName, moduleName, write, config) {
-                if (moduleName in buildMap) {
-                    var content = text.jsEscape(buildMap[moduleName]);
-                    write.asModule(pluginName + "!" + moduleName,
-                                   "define(function () { return '" +
-                                       content +
-                                   "';});\n");
-                }
-            },
-
-            writeFile: function (pluginName, moduleName, req, write, config) {
-                var parsed = text.parseName(moduleName),
-                    nonStripName = parsed.moduleName + '.' + parsed.ext,
-                    //Use a '.js' file name so that it indicates it is a
-                    //script that can be loaded across domains.
-                    fileName = req.toUrl(parsed.moduleName + '.' +
-                                         parsed.ext) + '.js';
-
-                //Leverage own load() method to load plugin value, but only
-                //write out values that do not have the strip argument,
-                //to avoid any potential issues with ! in file names.
-                text.load(nonStripName, req, function (value) {
-                    //Use own write() method to construct full module value.
-                    //But need to create shell that translates writeFile's
-                    //write() to the right interface.
-                    var textWrite = function (contents) {
-                        return write(fileName, contents);
-                    };
-                    textWrite.asModule = function (moduleName, contents) {
-                        return write.asModule(moduleName, fileName, contents);
-                    };
-
-                    text.write(pluginName, nonStripName, textWrite, config);
-                }, config);
-            }
-        };
-
-        return text;
-    });
-}());
-
 define('text!resources/templates/items/repository.html',[],function () { return '<div class="image">\n    <img src="<%- repo.get("owner.avatar_url") %>" />\n</div>\n<% if (repo.get("open_issues_count") > 0) { %>\n    <div class="badge"><%- repo.get("open_issues_count") %></div>\n<% } %>\n<div class="infos">\n    <h2><%- repo.get("name") %></h2>\n    <p><%- repo.get("owner.login") %></p>\n</div>\n';});
 
 define('views/repositories',[
@@ -25342,8 +25632,8 @@ define('collections/issues',[
         model: Issue,
 
         // Load list of issues for a repo
-        loadForRepo: function(repo) {
-            return api.execute("get:repos/"+repo+"/issues").then(this.reset.bind(this));
+        loadForRepo: function(repo, filter) {
+            return api.execute("get:repos/"+repo+"/issues", filter).then(this.reset.bind(this));
         }
     });
 
@@ -25355,9 +25645,10 @@ define('views/issues',[
     "hr/utils",
     "hr/dom",
     "hr/hr",
+    "utils/dialogs",
     "collections/issues",
     "text!resources/templates/items/issue.html"
-], function(_, $, hr, Issues, templateMain) {
+], function(_, $, hr, dialogs, Issues, templateMain) {
 
     var IssueItem = hr.List.Item.extend({
         className: "issue-item",
@@ -25396,12 +25687,80 @@ define('views/issues',[
         className: "issues",
         Collection: Issues,
 
+        initialize: function() {
+            IssuesView.__super__.initialize.apply(this, arguments);
+
+            this.issuesFilter = {
+                labels: "",
+                state: "open"
+            };
+        },
+
+        // Message when there is no issues
         displayEmptyList: function() {
             return $("<div>", {
                 "class": "tab-empty",
                 "html": '<div class="icon"><span class="octicon octicon-repo"></span></div>Select a repsoitory'
             });
         },
+
+        // Load issues with a specific filter
+        loadIssues: function(repo, filter) {
+            if (filter) {
+                this.issuesFilter = filter;
+            }
+
+
+            filter = {
+                labels: this.issuesFilter.labels,
+                state: this.issuesFilter.state
+            };
+            return this.collection.loadForRepo(repo, filter);
+        },
+
+        // Filter issues
+        onFilterIssues: function() {
+            return dialogs.schema({
+                title: "Filter Issues",
+                properties: {
+                    labels: {
+                        description: "Labels",
+                        type: "string"
+                    },
+                    state: {
+                        description: "State",
+                        type: "string",
+                        'enum': {
+                            'open': "Open",
+                            'close': "Close",
+                            'all': "All"
+                        }
+                    }
+                }
+            }, this.issuesFilter, { ok: "Filter" })
+            .then(this.loadIssues.bind(this, hr.app.currentRepo));
+        },
+
+        // Create new issue
+        onCreateNewIssue: function() {
+            return dialogs.schema({
+                title: "New Issue",
+                properties: {
+                    title: {
+                        description: "Title",
+                        type: "string"
+                    },
+                    body: {
+                        description: "Message",
+                        type: "string",
+                        textarea: true
+                    }
+                }
+            }, {}, { ok: "Submit new issue" })
+            .then(function(issue) {
+                console.log(issue);
+            });
+        }
     });
 
     return IssuesView;
@@ -26866,7 +27225,7 @@ define('views/issue',[
 
     return IssueView;
 });
-define('text!resources/templates/tab.html',[],function () { return '<div class="tab-header">\n    <span class="title"><%- title %></span>\n</div>\n<div class="tab-content"></div>';});
+define('text!resources/templates/tab.html',[],function () { return '<div class="tab-header">\n    <% _.each(actions, function(action, i) { %>\n    <a href="#" data-action="<%- i %>" class="button action pull-<%- action.position || "right" %>"><span class="octicon octicon-<%- action.icon %>"></span></a>\n    <% }); %>\n    <span class="title"><%- title %></span>\n</div>\n<div class="tab-content"></div>';});
 
 define('views/tab',[
     "hr/utils",
@@ -26879,6 +27238,13 @@ define('views/tab',[
     var TabView = hr.View.extend({
         className: "tab",
         template: templateMain,
+        defaults: {
+            content: new hr.View(),
+            actions: []
+        },
+        events: {
+            "click .action": "onClickAction"
+        },
 
         initialize: function(options) {
             TabView.__super__.initialize.apply(this, arguments);
@@ -26892,7 +27258,18 @@ define('views/tab',[
             return TabView.__super__.finish.apply(this, arguments);
         },
         templateContext: function() {
-            return this.options;
+            return {
+                title: this.options.title,
+                actions: this.options.actions,
+                cid: this.cid
+            };
+        },
+
+        // When clicking on an action
+        onClickAction: function(e) {
+            e.preventDefault();
+            var i = Number($(e.currentTarget).data("action"));
+            this.options.actions[i].click();
         }
     });
 
@@ -29537,6 +29914,7 @@ require([
     "hr/args",
     "backends/auth",
     "backends/api",
+    "utils/dialogs",
     "views/grid",
     "views/repositories",
     "views/issues",
@@ -29544,7 +29922,8 @@ require([
     "views/tab",
     "text!resources/templates/main.html",
     "utils/date"
-], function(_, $, Q, hr, args, auth, api, GridView, RepositoriesView, IssuesView, IssueView, TabView, templateMain) {
+], function(_, $, Q, hr, args, auth, api, dialogs,
+GridView, RepositoriesView, IssuesView, IssueView, TabView, templateMain) {
     // Configure hr
     hr.configure(args);
 
@@ -29567,6 +29946,8 @@ require([
         initialize: function() {
             Application.__super__.initialize.apply(this, arguments);
 
+            var that = this;
+
             // Current states
             this.currentRepo = null;
             this.currentIssue = null;
@@ -29580,18 +29961,41 @@ require([
             this.repositories = new RepositoriesView();
             this.tabRepos = new TabView({
                 title: "Repos",
-                content: this.repositories
+                content: this.repositories,
+                actions: [
+                    {
+                        position: "left",
+                        title: "Change Account",
+                        icon: "mark-github",
+                        click: function() {
+                            auth.clear();
+                            that.update();
+                        }
+                    }
+                ]
             });
             this.grid.addView(this.tabRepos, { width: 20 });
 
             // List of issues
             this.issues = new IssuesView();
-            this.issues.listenTo(this, "state:repo", function(repo) {
-                this.collection.loadForRepo(repo);
-            });
+            this.issues.listenTo(this, "state:repo", this.issues.loadIssues);
             this.tabIssues = new TabView({
                 title: "Issues",
-                content: this.issues
+                content: this.issues,
+                actions: [
+                    {
+                        position: "right",
+                        title: "Filter Issues",
+                        icon: "settings",
+                        click: this.issues.onFilterIssues.bind(this.issues)
+                    },
+                    {
+                        position: "right",
+                        title: "New Issue",
+                        icon: "plus",
+                        click: this.issues.onCreateNewIssue.bind(this.issues)
+                    }
+                ]
             });
             this.grid.addView(this.tabIssues, { width: 35 });
 
