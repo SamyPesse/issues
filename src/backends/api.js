@@ -31,7 +31,7 @@ define([
             if (options.auth) authInfos = options.auth;
             if (authInfos) options.headers['Authorization'] = 'Basic ' + hash.btoa(authInfos.username + ':' + authInfos.password)
 
-            return hr.Requests[httpMethod](API_URL+"/"+method, args? JSON.stringify(args) : null, {
+            return hr.Requests[httpMethod](API_URL+"/"+method, httpMethod == "get"? args : JSON.stringify(args || {}), {
                 dataType: options.dataType,
                 options: {
                     headers: options.headers

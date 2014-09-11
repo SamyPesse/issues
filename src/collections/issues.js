@@ -11,8 +11,8 @@ define([
         model: Issue,
 
         // Load list of issues for a repo
-        loadForRepo: function(repo) {
-            return api.execute("get:repos/"+repo+"/issues").then(this.reset.bind(this));
+        loadForRepo: function(repo, filter) {
+            return api.execute("get:repos/"+repo+"/issues", filter).then(this.reset.bind(this));
         }
     });
 

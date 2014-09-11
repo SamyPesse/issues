@@ -70,9 +70,7 @@ GridView, RepositoriesView, IssuesView, IssueView, TabView, templateMain) {
 
             // List of issues
             this.issues = new IssuesView();
-            this.issues.listenTo(this, "state:repo", function(repo) {
-                this.collection.loadForRepo(repo);
-            });
+            this.issues.listenTo(this, "state:repo", this.issues.loadIssues);
             this.tabIssues = new TabView({
                 title: "Issues",
                 content: this.issues,
@@ -81,33 +79,13 @@ GridView, RepositoriesView, IssuesView, IssueView, TabView, templateMain) {
                         position: "right",
                         title: "Filter Issues",
                         icon: "settings",
-                        click: function() {
-
-                        }
+                        click: this.issues.onFilterIssues.bind(this.issues)
                     },
                     {
                         position: "right",
                         title: "New Issue",
                         icon: "plus",
-                        click: function() {
-                            dialogs.schema({
-                                title: "New Issue",
-                                properties: {
-                                    title: {
-                                        description: "Title",
-                                        type: "string"
-                                    },
-                                    body: {
-                                        description: "Message",
-                                        type: "string",
-                                        textarea: true
-                                    }
-                                }
-                            }, {}, { ok: "Submit new issue" })
-                            .then(function(issue) {
-                                console.log(issue);
-                            });
-                        }
+                        click: this.issues.onCreateNewIssue.bind(this.issues)
                     }
                 ]
             });

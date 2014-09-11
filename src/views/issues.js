@@ -2,9 +2,10 @@ define([
     "hr/utils",
     "hr/dom",
     "hr/hr",
+    "utils/dialogs",
     "collections/issues",
     "text!resources/templates/items/issue.html"
-], function(_, $, hr, Issues, templateMain) {
+], function(_, $, hr, dialogs, Issues, templateMain) {
 
     var IssueItem = hr.List.Item.extend({
         className: "issue-item",
@@ -43,12 +44,70 @@ define([
         className: "issues",
         Collection: Issues,
 
+        initialize: function() {
+            IssuesView.__super__.initialize.apply(this, arguments);
+
+            this.issuesFilter = {
+                labels: ""
+            };
+        },
+
+        // Message when there is no issues
         displayEmptyList: function() {
             return $("<div>", {
                 "class": "tab-empty",
                 "html": '<div class="icon"><span class="octicon octicon-repo"></span></div>Select a repsoitory'
             });
         },
+
+        // Load issues with a specific filter
+        loadIssues: function(repo, filter) {
+            if (filter) {
+                this.issuesFilter = filter;
+            }
+
+
+            filter = {
+                labels: this.issuesFilter.labels,
+                state: this.issuesFilter.state
+            };
+            return this.collection.loadForRepo(repo, filter);
+        },
+
+        // Filter issues
+        onFilterIssues: function() {
+            return dialogs.schema({
+                title: "Filter Issues",
+                properties: {
+                    labels: {
+                        description: "Labels",
+                        type: "string"
+                    }
+                }
+            }, this.issuesFilter, { ok: "Filter" })
+            .then(this.loadIssues.bind(this, hr.app.currentRepo));
+        },
+
+        // Create new issue
+        onCreateNewIssue: function() {
+            return dialogs.schema({
+                title: "New Issue",
+                properties: {
+                    title: {
+                        description: "Title",
+                        type: "string"
+                    },
+                    body: {
+                        description: "Message",
+                        type: "string",
+                        textarea: true
+                    }
+                }
+            }, {}, { ok: "Submit new issue" })
+            .then(function(issue) {
+                console.log(issue);
+            });
+        }
     });
 
     return IssuesView;
