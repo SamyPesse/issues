@@ -4,17 +4,24 @@
     left: 0px;
     right: 0px;
     bottom: 0px;
+    overflow: auto;
     background-color: @background-color;
 
     .dialog {
-        .center-block();
+        position: absolute;
+        top: 50%;
+        left: 50%;
         .size(@login-dialog-width, @login-dialog-height);
-        margin-top: @login-margin-top;
+        margin-top: -(@login-dialog-height/2);
+        margin-left: -(@login-dialog-width/2);
+        text-align: center;
 
-        .logo {
-            font-size: 80px;
-            line-height: 1.4;
+        h1 {
+            margin: 0px;
             text-align: center;
+            margin-bottom: 15px;
+            font-size: 40px;
+            text-shadow: 0px 0px 1px #000;
         }
     }
 }

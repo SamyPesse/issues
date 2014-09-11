@@ -2,16 +2,15 @@
 <div class="screen-login">
     <div class="dialog">
         <div class="inner">
-            <div class="logo">
-                <i class="octicon octicon-mark-github"></i>
-            </div>
+            <h1>issues:manager</h1>
             <form class="form">
                 <div class="form-message message-danger" style="display: none;"></div>
                 <div class="form-control">
-                    <input type="text" name="username" placeholder="Username" />
+                    <input type="text" name="username" placeholder="GitHub Username" />
                 </div>
                 <div class="form-control">
-                    <input type="password" name="password" placeholder="Password" />
+                    <input type="password" name="password" placeholder="GitHub Password or Access Token" />
+                    <p class="help">You can also instead <a href="https://github.com/settings/applications" target="_blank">create a token for this application</a>.</p>
                 </div>
                 <div class="form-control">
                     <button class="button button-success button-block">Log in</button>
