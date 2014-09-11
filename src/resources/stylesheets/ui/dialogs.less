@@ -7,51 +7,51 @@
     bottom: 0px;
     background: rgba(0, 0, 0, 0.5);
     overflow: auto;
-}
 
-.dialog {
-    position: absolute;
-    z-index: 1000;
+    .dialog {
+        position: absolute;
+        z-index: 1000;
 
-    top: 20%;
-    left: 50%;
+        top: 20%;
+        left: 50%;
 
-    width: @dialog-size-medium;
-    margin-left: -@dialog-size-medium/2;
+        width: @dialog-size-medium;
+        margin-left: -@dialog-size-medium/2;
 
-    background: @dialog-background;
-    border: 1px solid @dialog-border-color;
-    border: 1px solid rgba(0,0,0,0.25);
-    border-radius: 5px;
-    box-shadow: 0 0 18px rgba(0,0,0,0.4);
+        background: @dialog-background;
+        border: 1px solid @dialog-border-color;
+        border: 1px solid rgba(0,0,0,0.25);
+        border-radius: 5px;
+        box-shadow: 0 0 18px rgba(0,0,0,0.4);
 
-    &.size-large {
-        width: @dialog-size-large;
-        margin-left: -@dialog-size-large/2;
-    }
-
-    &.size-small {
-        width: @dialog-size-small;
-        margin-left: -@dialog-size-small/2;
-    }
-
-    .dialog-header {
-        margin: 0px;
-        padding: @dialog-padding-v @dialog-padding-h;
-        border-bottom: 1px solid #ddd;
-
-        h2 {
-            margin: 0px;
-            padding: 0px;
-            font-size: 18px;
+        &.size-large {
+            width: @dialog-size-large;
+            margin-left: -@dialog-size-large/2;
         }
-    }
 
-    .dialog-content {
-        padding: @dialog-padding-v @dialog-padding-h;
-    }
+        &.size-small {
+            width: @dialog-size-small;
+            margin-left: -@dialog-size-small/2;
+        }
 
-    .dialog-footer {
-        padding: @dialog-padding-v @dialog-padding-h;
+        .dialog-header {
+            margin: 0px;
+            padding: @dialog-padding-v @dialog-padding-h;
+            border-bottom: 1px solid #ddd;
+
+            h2 {
+                margin: 0px;
+                padding: 0px;
+                font-size: 18px;
+            }
+        }
+
+        .dialog-content {
+            padding: @dialog-padding-v @dialog-padding-h;
+        }
+
+        .dialog-footer {
+            padding: @dialog-padding-v @dialog-padding-h;
+        }
     }
 }
