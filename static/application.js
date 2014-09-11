@@ -23972,7 +23972,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1410444697364,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1410458835205,"baseUrl":"/"}; });
 define('backends/auth',[
     "hr/hr",
     "hr/promise"
@@ -24343,16 +24343,16 @@ define('views/dialogs/container',[
             size: "medium"
         },
         events: {
-            "click": "close",
+            "click": "onClickClose",
             "click .dialog": "stopPropagation",
-            "keydown": "keydown"
+            "keydown": "onKeydown"
         },
 
         initialize: function(options) {
             DialogView.__super__.initialize.apply(this, arguments);
 
             // Bind keyboard
-            this.keydownHandler = _.bind(this.keydown, this)
+            this.keydownHandler = _.bind(this.onKeydown, this)
             if (this.options.keyboard) $(document).bind("keydown", this.keydownHandler);
 
             this.$dialog = $("<div>", {'class': "dialog"});
@@ -24401,7 +24401,7 @@ define('views/dialogs/container',[
             DialogView.current = null;
         },
 
-        keydown: function(e) {
+        onKeydown: function(e) {
             if (!this.options.keyboard) return;
 
             var key = e.keyCode || e.which;
@@ -24414,6 +24414,10 @@ define('views/dialogs/container',[
             if (key == 27) {
                 this.close(e, true);
             }
+        },
+
+        onClickClose: function(e) {
+            this.close(e, true);
         },
 
         stopPropagation: function(e) {
