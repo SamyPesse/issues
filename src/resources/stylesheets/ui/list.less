@@ -6,6 +6,7 @@
     .item {
         .clearfix();
         padding: 6px;
+        border-left: 5px solid transparent;
         border-bottom: 1px solid @manager-delimiter-color;
         cursor: pointer;
 
@@ -14,21 +15,11 @@
         }
 
         &.active {
-            background: @brand-success;
-            border-color: @brand-success;
-            border-top:1px solid;
-            margin-top: -1px;
-            color: #fff;
+            border-left-color: @list-active-color;
 
             .badge {
-                background: #fff;
-                color: @brand-success;
-            }
-
-            .infos {
-                p {
-                    color: #fefefe;
-                }
+                background: @list-active-color;
+                color: #fff;
             }
         }
 
