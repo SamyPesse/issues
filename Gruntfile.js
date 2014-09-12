@@ -98,9 +98,14 @@ module.exports = function (grunt) {
                 // Modules paths
                 'paths': {
                     "moment": path.resolve(srcPath, "vendors/moment/moment"),
-                    "marked": path.resolve(srcPath, "vendors/marked/lib/marked")
+                    "marked": path.resolve(srcPath, "vendors/marked/lib/marked"),
+                    "highlight": path.resolve(srcPath, "vendors/highlightjs/highlight.pack")
                 },
-                "shim": {},
+                "shim": {
+                    "highlight": {
+                        "exports": "hljs"
+                    }
+                },
                 'args': {},
                 'options': {}
             }

@@ -2,9 +2,10 @@ define([
     "hr/utils",
     "hr/dom",
     "hr/hr",
+    "highlight",
     "collections/comments",
     "text!resources/templates/items/comment.html"
-], function(_, $, hr, Comments, templateMain) {
+], function(_, $, hr, hljs, Comments, templateMain) {
 
     var CommentItem = hr.List.Item.extend({
         className: "comment",
@@ -20,6 +21,12 @@ define([
             return {
                 comment: this.model
             };
+        },
+        finish: function() {
+            this.$('pre code').each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
+            return CommentItem.__super__.finish.apply(this, arguments);
         }
     });
 

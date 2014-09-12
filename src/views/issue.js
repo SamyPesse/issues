@@ -6,7 +6,6 @@ define([
     "views/comments",
     "text!resources/templates/issue.html"
 ], function(_, $, hr, Issue, CommentsView, templateMain) {
-
     var IssueView = hr.View.extend({
         className: "issue",
         template: templateMain,
