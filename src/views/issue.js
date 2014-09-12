@@ -33,7 +33,7 @@ define([
 
         render: function() {
             this.comments.detach();
-            this.comments.collection.loadForIssue(hr.app.currentRepo, this.model);
+            if (this.model.get("id")) this.comments.collection.loadForIssue(hr.app.currentRepo, this.model);
             return IssueView.__super__.render.apply(this, arguments);
         },
         finish: function() {
@@ -44,7 +44,6 @@ define([
         // When the current issue change
         onIssueChange: function(issue) {
             if (!issue) {
-                console.log("clear issue");
                 return this.model.clear();
             }
             return this.model.loadByNumber(hr.app.currentRepo, issue);
